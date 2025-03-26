@@ -29,6 +29,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # local apps
+    "users.apps.UsersConfig",
+
     # third-party apps
     'rest_framework',
     'rest_framework_simplejwt',
@@ -77,6 +80,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+# custom user
+AUTH_USER_MODEL = "users.User"
 
 # API Base configuration
 REST_FRAMEWORK = {
