@@ -65,7 +65,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -91,6 +91,17 @@ REST_FRAMEWORK = {
     ),
     # Use drf-spectacular for schema generation
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/minute',  # Limit unauthenticated users to 5 requests per minute
+        'user': '10/minute',  # Limit authenticated users to 10 requests per minute
+        'email_confirmation': '3/minute',  # Custom throttle for email confirmation (3 requests per minute)
+    },
 }
 
 SPECTACULAR_SETTINGS = {
@@ -108,6 +119,20 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
+}
+
+
+# redis for caching
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',  # Redis server location and database index
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'KEY_PREFIX': 'buy-sell-pref'  # Prefix for cache keys to avoid collisions
+    }
 }
 
 
@@ -157,7 +182,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,  # preserve the default loggers
+    'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
             'format': '{levelname} {asctime} {module} {message}',
@@ -191,8 +216,23 @@ LOGGING = {
         },
         'rest_framework': {
             'handlers': ['console', 'file'],
-            'level': 'DEBUG',  # adjust level if needed
+            'level': 'DEBUG',
             'propagate': False,
         },
     },
 }
+
+# email sending configuration
+email_backend = os.environ.get('EMAIL_BACKEND')
+email_host = os.environ.get('EMAIL_HOST')
+email_use_tls = os.environ.get('EMAIL_USE_TLS')
+email_port = os.environ.get('EMAIL_PORT')
+email_host_user = os.environ.get('EMAIL_HOST_USER')
+email_host_password = os.environ.get('EMAIL_HOST_PASSWORD')
+
+EMAIL_BACKEND = email_backend
+EMAIL_HOST = email_host
+EMAIL_USE_TLS = email_use_tls
+EMAIL_PORT = email_port
+EMAIL_HOST_USER = email_host_user
+EMAIL_HOST_PASSWORD = email_host_password

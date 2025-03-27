@@ -31,7 +31,7 @@ class User(AbstractUser):
 
     id = models.UUIDField(default=uuid.uuid4, editable=False, db_index=True, primary_key=True)
 
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=True, db_index=True)
     full_username = models.CharField(max_length=100, help_text="Full user name (e.g John Doe)")
     avatar = models.ImageField(upload_to='avatars/', default='avatars/default-boy-avatar.jpg', null=True)
     age = models.IntegerField(
@@ -46,6 +46,7 @@ class User(AbstractUser):
     )
     phone_number = PhoneNumberField(
         unique=True,
+        region='GE',
         help_text="User phone number (e.g To contact the seller)"
     )
 

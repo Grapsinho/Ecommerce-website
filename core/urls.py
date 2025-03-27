@@ -7,7 +7,10 @@ import debug_toolbar
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    #for development
+    # user authentication
+    path('', include('users.urls')),
+
+    # for development
     path("__debug__/", include(debug_toolbar.urls)),
 ]
 
