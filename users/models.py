@@ -47,7 +47,7 @@ class User(AbstractUser):
     phone_number = PhoneNumberField(
         unique=True,
         region='GE',
-        help_text="User phone number (e.g To contact the seller)"
+        help_text="User phone number (e.g +995597713815)"
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
