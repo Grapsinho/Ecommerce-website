@@ -39,9 +39,6 @@ INSTALLED_APPS = [
 
     "corsheaders",
 
-    # to reset passwords
-    'djoser',
-
     # documentation
     'drf_spectacular',
 ]
@@ -56,6 +53,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -104,21 +102,21 @@ REST_FRAMEWORK = {
     },
 }
 
+# JWT token Base configuration
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1), # i will change these after im done with testing
+    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=2), # i will change these after im done with testing
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
+
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Buy-Sell E-commerce',
     'DESCRIPTION': 'API documentation for the buy-sell E-commerce.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
-}
-
-
-# JWT token Base configuration
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=3),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=5),
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
 }
 
 
