@@ -18,7 +18,7 @@ from .models import User
 from .serializers import RegisterSerializer, LoginUserSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer
 from .throttles import EmailConfirmationRateThrottle, LoginRateThrottle
 from utils import email_confirm, set_jwt_token
-from .permissions import IsAuthenticatedWithJWT
+from .authentication import JWTAuthentication
 
 logger = logging.getLogger("rest_framework")
 
@@ -26,9 +26,23 @@ logger = logging.getLogger("rest_framework")
 
 class EmailConfirmationView(APIView):
     """
-    This view handles email confirmation by sending a code and validating it.
+    post:
+    Handle email confirmation for a new user.
+
+    - If only the email is provided, sends a confirmation code via email.
+    - If the email and a code are provided, validates the code.
+
+    Request body parameters:
+      - email (str): The email address to confirm.
+      - code (str, optional): The confirmation code sent to the email.
+
+    Responses:
+      - 200 OK: Confirmation code sent or email confirmed.
+      - 400 Bad Request: Missing email or invalid/expired confirmation code.
     """
+
     throttle_classes = [EmailConfirmationRateThrottle]
+    serializer_class = None
 
     def post(self, request):
         email = request.data.get('email')
@@ -90,6 +104,23 @@ class EmailConfirmationView(APIView):
 
 
 class RegisterView(generics.CreateAPIView):
+
+    """
+    post:
+    Register a new user after confirming their email.
+    
+    Request body parameters:
+      - username, email, age, password, city, phone_number, avatar
+
+    On success:
+      - Issues JWT access and refresh tokens as secure cookies.
+      - Returns a message confirming registration.
+
+    Responses:
+      - 201 Created: Registration successful.
+      - 400 Bad Request: Validation errors (e.g., email not confirmed).
+    """
+
     serializer_class = RegisterSerializer
 
     def post(self, request):
@@ -114,6 +145,24 @@ class RegisterView(generics.CreateAPIView):
 
 
 class LoginUser(APIView):
+
+    """
+    post:
+    Authenticate a user with email and password.
+
+    Request body parameters:
+      - email (str)
+      - password (str)
+
+    On success:
+      - Issues JWT access and refresh tokens as secure cookies.
+      - Returns a login success message.
+
+    Responses:
+      - 200 OK: Login successful.
+      - 400 Bad Request: Invalid credentials.
+    """
+
     permission_classes = [AllowAny]
     serializer_class = LoginUserSerializer
     throttle_classes = [LoginRateThrottle]
@@ -139,6 +188,16 @@ class LoginUser(APIView):
 
 
 class LogoutUser(APIView):
+
+    """
+    post:
+    Log out the current user by blacklisting the refresh token and deleting JWT cookies.
+
+    Responses:
+      - 200 OK: Logout successful.
+      - 400 Bad Request: Error during logout (e.g., token already blacklisted).
+    """
+
     serializer_class = None
     permission_classes = [AllowAny]
 
@@ -169,7 +228,19 @@ class LogoutUser(APIView):
 
 
 class ProtectedView(APIView):
-    permission_classes = [IsAuthenticatedWithJWT]
+
+    """
+    get:
+    A protected endpoint that requires a valid JWT access token.
+
+    Responses:
+      - 200 OK: Returns a welcome message if the token is valid.
+      - 401 Unauthorized: If the token is missing or invalid, returns a message:
+        "Access token expired. Please refresh your session."
+    """
+
+    serializer_class = None
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request):
 
@@ -182,6 +253,21 @@ class ProtectedView(APIView):
     
 
 class PasswordResetRequestView(APIView):
+
+    """
+    post:
+    Request a password reset email.
+
+    Request body parameters:
+      - email (str)
+
+    Responses:
+      - 200 OK: Indicates that if the email exists, a password reset email has been sent.
+      - 400 Bad Request: Validation errors.
+    """
+
+    serializer_class = None
+
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)
         if serializer.is_valid():
@@ -214,6 +300,23 @@ class PasswordResetRequestView(APIView):
 
 
 class PasswordResetConfirmView(APIView):
+
+    """
+    post:
+    Confirm and process a password reset request.
+
+    Request body parameters:
+      - email (str)
+      - token (str)
+      - new_password (str)
+
+    Responses:
+      - 200 OK: Password reset successfully.
+      - 400 Bad Request: Invalid or expired token, or validation errors.
+    """
+
+    serializer_class = None
+
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():
@@ -223,15 +326,32 @@ class PasswordResetConfirmView(APIView):
 
 
 class RefreshAccessTokenView(APIView):
+
+    """
+    post:
+    Refresh the JWT access token using the refresh token stored in cookies.
+
+    - If the refresh token is valid:
+        Returns new access and refresh tokens as secure cookies.
+    - If the refresh token is invalid or expired:
+        Returns a 401 Unauthorized with message: 
+        "Invalid or expired refresh token. Please log in again."
+
+    Responses:
+      - 200 OK: New tokens issued.
+      - 401 Unauthorized: Invalid or expired refresh token.
+    """
+
     permission_classes = [AllowAny]
+    serializer_class = None
 
     def post(self, request):
         refresh_token = request.COOKIES.get("refresh_token")
         if not refresh_token:
             logger.info("Refresh token not provided in cookies.")
             return Response(
-                {"message": "Invalid or expired refresh token. Please log in again."},
-                status=status.HTTP_400_BAD_REQUEST
+                {"message": "Invalid or expired token. Please log in again."},
+                status=status.HTTP_401_UNAUTHORIZED
             )
 
         try:
@@ -240,7 +360,7 @@ class RefreshAccessTokenView(APIView):
         except TokenError as e:
             logger.info("Invalid or expired refresh token: %s", e)
             return Response(
-                {"message": "Invalid or expired refresh token. Please log in again."},
+                {"message": "Invalid or expired token. Please log in again."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
