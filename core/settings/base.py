@@ -103,6 +103,11 @@ REST_FRAMEWORK = {
 }
 
 # JWT token Base configuration
+
+access_token_lifetime = os.environ.get("ACCESS_TOKEN_LIFETIME_MINUTES", 1)
+refresh_token_lifetime = os.environ.get("REFRESH_TOKEN_LIFETIME_MINUTES", 2)
+
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1), # i will change these after im done with testing
     "REFRESH_TOKEN_LIFETIME": timedelta(minutes=2), # i will change these after im done with testing
