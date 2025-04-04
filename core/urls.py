@@ -8,6 +8,8 @@ import logging
 # Log the value of DEBUG
 logging.debug(f"DEBUG is set to {settings.DEBUG}")
 
+print(f"DEBUG is set to {settings.DEBUG}")
+
 
 # Import debug_toolbar conditionally in development
 if settings.DEBUG:
