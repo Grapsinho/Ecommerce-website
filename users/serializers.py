@@ -28,7 +28,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         
-        fields = ('username', 'email', 'age', 'password', 'city', 'phone_number', 'avatar')
+        fields = ('full_username', 'email', 'age', 'password', 'city', 'phone_number', 'avatar')
     
     def validate_email(self, value):
         value = value.lower()
