@@ -4,6 +4,10 @@ from .base import *
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
 
 
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+
 
 db_host = os.environ.get('DB_HOST')
 db_port = os.environ.get('DB_PORT')
