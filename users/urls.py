@@ -4,7 +4,7 @@ from .views import (
     RegisterView,
     LoginUser,
     LogoutUser,
-    ProtectedView,
+    UserProfileView,
     PasswordResetConfirmView,
     PasswordResetRequestView,
     RefreshAccessTokenView
@@ -22,5 +22,6 @@ urlpatterns = [
 
     path('token/refresh/', RefreshAccessTokenView.as_view(), name='token_refresh'),
 
-    path('auth/protected/', ProtectedView.as_view(), name='protected'),
+    path("profile/<uuid:user_id>/", UserProfileView.as_view(), name="user-profile"),
+
 ]

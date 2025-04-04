@@ -122,10 +122,12 @@ SPECTACULAR_SETTINGS = {
 
 # redis for caching
 
+redis_url = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1")
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',  # Redis server location and database index
+        'LOCATION': redis_url,  # Redis server location and database index
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         },
@@ -166,6 +168,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = Path(__file__).resolve().parents[2] / "staticfiles"
 
 MEDIA_URL = '/media/'  # URL to access media files via HTTP
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/media')  # Directory to store media files on disk

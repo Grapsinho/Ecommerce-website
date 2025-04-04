@@ -15,10 +15,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
 from .models import User
-from .serializers import RegisterSerializer, LoginUserSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer
+from .serializers import RegisterSerializer, LoginUserSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer, UserProfileSerializer
 from .throttles import EmailConfirmationRateThrottle, LoginRateThrottle
 from utils import email_confirm, set_jwt_token
 from .authentication import JWTAuthentication
+
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
 
 logger = logging.getLogger("rest_framework")
 
@@ -251,6 +253,42 @@ class ProtectedView(APIView):
 
         return response
     
+
+class UserProfileView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+
+    @extend_schema(
+        summary="Get User Profile by ID",
+        description="Returns public profile information of a user by their UUID. Authentication is required.",
+        parameters=[
+            OpenApiParameter(
+                name='user_id',
+                description='UUID of the user whose profile is being fetched.',
+                required=True,
+                type={'type': 'string', 'format': 'uuid'},
+                location=OpenApiParameter.PATH,
+            )
+        ],
+        responses={
+            200: OpenApiResponse(
+                response=UserProfileSerializer,
+                description="User profile retrieved successfully."
+            ),
+            401: OpenApiResponse(description="Unauthorized. Access token is missing or invalid."),
+            404: OpenApiResponse(description="User not found."),
+        },
+        tags=["Users"]
+    )
+
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class PasswordResetRequestView(APIView):
 

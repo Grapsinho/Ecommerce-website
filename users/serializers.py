@@ -5,6 +5,12 @@ from django.contrib.auth import authenticate
 from django.db import IntegrityError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from PIL import Image
+import io
+import sys
+
+
 import logging
 
 logger = logging.getLogger("rest_framework")
@@ -32,6 +38,42 @@ class RegisterSerializer(serializers.ModelSerializer):
             logger.warning(f"Registration attempt with unconfirmed email: {value}")
             raise serializers.ValidationError("Email not confirmed. Please confirm your email before registering.")
         return value
+    
+    def validate_avatar(self, avatar):
+        # Check file type
+        if not avatar.content_type.startswith("image"):
+            raise serializers.ValidationError("Uploaded file is not an image.")
+
+        # Check file size (10MB max)
+        max_size_mb = 10
+        if avatar.size > max_size_mb * 1024 * 1024:
+            raise serializers.ValidationError(f"Image size should not exceed {max_size_mb} MB.")
+
+        try:
+            # Open and optimize the image
+            image = Image.open(avatar)
+            image_format = image.format  # Preserve original format
+
+            # Create a BytesIO stream to save optimized image
+            output_io = io.BytesIO()
+            image.save(output_io, format=image_format, optimize=True, quality=85)
+
+            # Move the file pointer to the start
+            output_io.seek(0)
+
+            # Recreate a new InMemoryUploadedFile with the optimized image
+            optimized_avatar = InMemoryUploadedFile(
+                file=output_io,
+                field_name="avatar",
+                name=avatar.name,
+                content_type=avatar.content_type,
+                size=sys.getsizeof(output_io),
+                charset=None
+            )
+
+            return optimized_avatar
+        except Exception as e:
+            raise serializers.ValidationError(f"Failed to process image: {str(e)}")
 
     def create(self, validated_data):
         try:
@@ -101,3 +143,11 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         user.set_password(new_password)
         user.save()
         return user
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'id', 'email', 'full_username', 'avatar', 'age', 'city', 'phone_number', 'created_at'
+        )
