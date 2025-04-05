@@ -40,6 +40,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
     
     def validate_avatar(self, avatar):
+
+        if not avatar:
+            return None
+
         # Check file type
         if not avatar.content_type.startswith("image"):
             raise serializers.ValidationError("Uploaded file is not an image.")
