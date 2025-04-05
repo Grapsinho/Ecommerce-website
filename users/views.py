@@ -434,13 +434,12 @@ def create_superuser_view(request):
     # Customize the credentials here
     user = User.objects.create_superuser(
         username="admin",
-        email="giguuag@gmail.com",
-        password="giorgi123",
+        email="admin@gmail.com",
+        password="adminadmin123",
         age=21,
         phone_number="+995598351432",
         full_username="admin_vaa",
         city="Gori"
     )
 
-    print(user.avatar.url)
     return JsonResponse({"message": "Superuser created successfully."})
