@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
 import uuid
 
@@ -56,7 +56,8 @@ class User(AbstractUser):
     )
     age = models.IntegerField(
         validators=[
-            MinValueValidator(18)
+            MinValueValidator(18),
+            MaxValueValidator(120)
         ], 
         help_text="Only store age that 18 or are above 18 (e.g 18, 19, 20...)"
     )

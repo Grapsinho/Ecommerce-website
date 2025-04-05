@@ -28,19 +28,32 @@ logger = logging.getLogger("rest_framework")
 
 class EmailConfirmationView(APIView):
     """
-    post:
-    Handle email confirmation for a new user.
+    EmailConfirmationView
 
-    - If only the email is provided, sends a confirmation code via email.
-    - If the email and a code are provided, validates the code.
+    Handles email confirmation for new user registration in two steps:
+    
+    1. **Requesting a confirmation code:**
+       - When only the email is provided, the endpoint generates a 6-digit confirmation code.
+       - The code is sent to the provided email address and cached for 60 seconds.
+       
+    2. **Validating a confirmation code:**
+       - When both email and code are provided, the endpoint validates the confirmation code.
+       - If valid, the email is marked as confirmed for 10 minutes.
 
-    Request body parameters:
-      - email (str): The email address to confirm.
-      - code (str, optional): The confirmation code sent to the email.
+    **Request Body Parameters:**
+      - **email (str):** The email address to be confirmed.
+      - **code (str, optional):** The 6-digit confirmation code sent to the email.
 
-    Responses:
-      - 200 OK: Confirmation code sent or email confirmed.
-      - 400 Bad Request: Missing email or invalid/expired confirmation code.
+    **Responses:**
+      - **200 OK:**
+          - When a confirmation code is successfully sent.
+          - When the provided confirmation code is validated and the email is confirmed.
+      - **400 Bad Request:**
+          - If the email is missing.
+          - If the user with the email already exists.
+          - If the confirmation code is missing, expired, or invalid.
+      - **500 Internal Server Error:**
+          - If there is a failure sending the email.
     """
 
     throttle_classes = [EmailConfirmationRateThrottle]
@@ -68,6 +81,18 @@ class EmailConfirmationView(APIView):
             return self.validate_confirmation_code(email, code, code_cache_key, confirmed_cache_key)
 
     def send_confirmation_code(self, email, code_cache_key):
+        """
+        Generates and sends a confirmation code to the provided email.
+        Stores the code in cache with a 60-second timeout.
+
+        **Parameters:**
+          - email (str): The target email address.
+          - code_cache_key (str): The cache key used to store the confirmation code.
+
+        **Returns:**
+          - 200 OK with a success message if email sent.
+          - 500 Internal Server Error if email sending fails.
+        """
         generated_code = str(random.randint(100000, 999999))
         subject = 'Your Confirmation Code'
         text_content = (
@@ -89,6 +114,20 @@ class EmailConfirmationView(APIView):
         return Response({"detail": "Confirmation code sent to email."}, status=status.HTTP_200_OK)
 
     def validate_confirmation_code(self, email, code, code_cache_key, confirmed_cache_key):
+        """
+        Validates the confirmation code provided by the user.
+        If valid, sets a cache flag to mark the email as confirmed.
+
+        **Parameters:**
+          - email (str): The email being confirmed.
+          - code (str): The confirmation code provided by the user.
+          - code_cache_key (str): Cache key where the correct code is stored.
+          - confirmed_cache_key (str): Cache key used to store the confirmation status.
+
+        **Returns:**
+          - 200 OK with a success message if the code is valid.
+          - 400 Bad Request if the code is expired or invalid.
+        """
         cached_code = cache.get(code_cache_key)
         if not cached_code:
             logger.warning(f"Expired or missing confirmation code for email {email}")
@@ -106,21 +145,24 @@ class EmailConfirmationView(APIView):
 
 
 class RegisterView(generics.CreateAPIView):
-
     """
-    post:
-    Register a new user after confirming their email.
-    
-    Request body parameters:
-      - username, email, age, password, city, phone_number, avatar
+    RegisterView
 
-    On success:
-      - Issues JWT access and refresh tokens as secure cookies.
-      - Returns a message confirming registration.
+    Registers a new user once the email has been confirmed. Upon successful registration,
+    JWT access and refresh tokens are issued as secure cookies.
 
-    Responses:
-      - 201 Created: Registration successful.
-      - 400 Bad Request: Validation errors (e.g., email not confirmed).
+    **Request Body Parameters:**
+      - **username (str)**
+      - **email (str)**
+      - **age (int)**
+      - **password (str)**
+      - **city (str)**
+      - **phone_number (str)**
+      - **avatar (file or URL)**
+
+    **Responses:**
+      - **201 Created:** User registration successful, tokens set in secure cookies.
+      - **400 Bad Request:** Registration validation errors (e.g., unconfirmed email or invalid data).
     """
 
     serializer_class = RegisterSerializer
@@ -145,24 +187,20 @@ class RegisterView(generics.CreateAPIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class LoginUser(APIView):
-
     """
-    post:
-    Authenticate a user with email and password.
+    LoginUser
 
-    Request body parameters:
-      - email (str)
-      - password (str)
+    Authenticates a user using email and password credentials. On successful authentication,
+    issues JWT tokens as secure cookies.
 
-    On success:
-      - Issues JWT access and refresh tokens as secure cookies.
-      - Returns a login success message.
+    **Request Body Parameters:**
+      - **email (str):** User's email address.
+      - **password (str):** User's password.
 
-    Responses:
-      - 200 OK: Login successful.
-      - 400 Bad Request: Invalid credentials.
+    **Responses:**
+      - **200 OK:** Login successful with JWT tokens issued.
+      - **400 Bad Request:** Invalid credentials or validation errors.
     """
 
     permission_classes = [AllowAny]
@@ -190,14 +228,15 @@ class LoginUser(APIView):
 
 
 class LogoutUser(APIView):
-
     """
-    post:
-    Log out the current user by blacklisting the refresh token and deleting JWT cookies.
+    LogoutUser
 
-    Responses:
-      - 200 OK: Logout successful.
-      - 400 Bad Request: Error during logout (e.g., token already blacklisted).
+    Logs out the current user by blacklisting the provided refresh token (if available)
+    and removing the JWT cookies.
+
+    **Responses:**
+      - **200 OK:** Logout successful.
+      - **400 Bad Request:** An error occurred during logout (e.g., token already blacklisted <- SKIP THIS IT'S NOTHING IMPORTANT).
     """
 
     serializer_class = None
@@ -213,7 +252,7 @@ class LogoutUser(APIView):
             refresh_token = request.COOKIES.get("refresh_token")
             if refresh_token:
                 token = RefreshToken(refresh_token)
-                token.blacklist()  # Blacklist the token
+                token.blacklist()  # Blacklist the token to invalidate it
         except Exception as e:
             logger.warning(f"Logout failed: {e}")
             response.data = {
@@ -226,35 +265,23 @@ class LogoutUser(APIView):
         response.delete_cookie('refresh_token')
 
         return response
-    
 
-
-class ProtectedView(APIView):
-
-    """
-    get:
-    A protected endpoint that requires a valid JWT access token.
-
-    Responses:
-      - 200 OK: Returns a welcome message if the token is valid.
-      - 401 Unauthorized: If the token is missing or invalid, returns a message:
-        "Access token expired. Please refresh your session."
-    """
-
-    serializer_class = None
-    authentication_classes = [JWTAuthentication]
-
-    def get(self, request):
-
-        response = Response(
-            {"message": "message successful"},
-            status=status.HTTP_200_OK,
-        )
-
-        return response
-    
 
 class UserProfileView(APIView):
+    """
+    UserProfileView
+
+    Retrieves public profile information for a user specified by their UUID.
+    Authentication is required to access this endpoint.
+
+    **Path Parameter:**
+      - **user_id (UUID):** The UUID of the user whose profile is requested.
+
+    **Responses:**
+      - **200 OK:** Returns the user profile data using UserProfileSerializer.
+      - **401 Unauthorized:** When the access token is missing or invalid.
+      - **404 Not Found:** If the user with the given UUID does not exist.
+    """
 
     authentication_classes = [JWTAuthentication]
 
@@ -280,7 +307,6 @@ class UserProfileView(APIView):
         },
         tags=["Users"]
     )
-
     def get(self, request, user_id):
         try:
             user = User.objects.get(id=user_id)
@@ -290,18 +316,23 @@ class UserProfileView(APIView):
         serializer = UserProfileSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class PasswordResetRequestView(APIView):
-
     """
-    post:
-    Request a password reset email.
+    PasswordResetRequestView
 
-    Request body parameters:
-      - email (str)
+    Initiates a password reset request. If the provided email is associated with an account,
+    a password reset email containing a unique token and reset URL is sent to the user.
 
-    Responses:
-      - 200 OK: Indicates that if the email exists, a password reset email has been sent.
-      - 400 Bad Request: Validation errors.
+    **Request Body Parameters:**
+      - **email (str):** The email address of the user requesting a password reset.
+
+    **Responses:**
+      - **200 OK:** A message indicating that if the email exists, a reset email has been sent.
+      - **400 Bad Request:** Validation errors in the provided email.
+    
+    **Note:**
+      - Even if the email is not found, the same success response is returned to avoid email enumeration.
     """
 
     serializer_class = None
@@ -327,7 +358,7 @@ class PasswordResetRequestView(APIView):
                 )
                 send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
             except User.DoesNotExist:
-                
+                # Do not reveal that the email does not exist in the system
                 pass
 
             return Response(
@@ -338,19 +369,19 @@ class PasswordResetRequestView(APIView):
 
 
 class PasswordResetConfirmView(APIView):
-
     """
-    post:
-    Confirm and process a password reset request.
+    PasswordResetConfirmView
 
-    Request body parameters:
-      - email (str)
-      - token (str)
-      - new_password (str)
+    Confirms a password reset request by validating the token and updating the user's password.
 
-    Responses:
-      - 200 OK: Password reset successfully.
-      - 400 Bad Request: Invalid or expired token, or validation errors.
+    **Request Body Parameters:**
+      - **email (str):** The user's email address.
+      - **token (str):** The token provided in the password reset email.
+      - **new_password (str):** The new password for the user.
+
+    **Responses:**
+      - **200 OK:** Password has been reset successfully.
+      - **400 Bad Request:** Token is invalid/expired or other validation errors.
     """
 
     serializer_class = None
@@ -364,20 +395,16 @@ class PasswordResetConfirmView(APIView):
 
 
 class RefreshAccessTokenView(APIView):
-
     """
-    post:
-    Refresh the JWT access token using the refresh token stored in cookies.
+    RefreshAccessTokenView
 
-    - If the refresh token is valid:
-        Returns new access and refresh tokens as secure cookies.
-    - If the refresh token is invalid or expired:
-        Returns a 401 Unauthorized with message: 
-        "Invalid or expired refresh token. Please log in again."
+    Refreshes the JWT access token using the refresh token stored in cookies.
+    If the refresh token is valid, new JWT access and refresh tokens are issued as secure cookies.
+    If the refresh token is invalid or expired, a 401 Unauthorized response is returned.
 
-    Responses:
-      - 200 OK: New tokens issued.
-      - 401 Unauthorized: Invalid or expired refresh token.
+    **Responses:**
+      - **200 OK:** New tokens issued and returned in secure cookies.
+      - **401 Unauthorized:** If the refresh token is missing, invalid, or expired.
     """
 
     permission_classes = [AllowAny]
@@ -420,26 +447,3 @@ class RefreshAccessTokenView(APIView):
         # Update cookies with new tokens
         set_jwt_token.set_secure_jwt_cookie(response, new_access_token, new_refresh_token)
         return response
-    
-
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-@csrf_exempt  # Optional: disable CSRF for quick access, but only if it's safe
-def create_superuser_view(request):
-
-    # Prevent accidental duplicate creation
-    if User.objects.filter(is_superuser=True).exists():
-        return JsonResponse({"message": "Superuser already exists."}, status=400)
-
-    # Customize the credentials here
-    user = User.objects.create_superuser(
-        username="admin",
-        email="admin@gmail.com",
-        password="adminadmin123",
-        age=21,
-        phone_number="+995598351432",
-        full_username="admin_vaa",
-        city="Gori"
-    )
-
-    return JsonResponse({"message": "Superuser created successfully."})
