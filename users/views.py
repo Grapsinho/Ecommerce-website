@@ -422,23 +422,23 @@ class RefreshAccessTokenView(APIView):
         return response
     
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-@csrf_exempt  # Optional: disable CSRF for quick access, but only if it's safe
-def create_superuser_view(request):
+# from django.http import JsonResponse
+# from django.views.decorators.csrf import csrf_exempt
+# @csrf_exempt  # Optional: disable CSRF for quick access, but only if it's safe
+# def create_superuser_view(request):
 
-    # Prevent accidental duplicate creation
-    if User.objects.filter(is_superuser=True).exists():
-        return JsonResponse({"message": "Superuser already exists."}, status=400)
+#     # Prevent accidental duplicate creation
+#     if User.objects.filter(is_superuser=True).exists():
+#         return JsonResponse({"message": "Superuser already exists."}, status=400)
 
-    # Customize the credentials here
-    User.objects.create_superuser(
-        username="admin",
-        email="giguuag@gmail.com",
-        password="giorgi123",
-        age=21,
-        phone_number="+995598351432",
-        full_username="admin_vaa",
-        city="Gori"
-    )
-    return JsonResponse({"message": "Superuser created successfully."})
+#     # Customize the credentials here
+#     User.objects.create_superuser(
+#         username="admin",
+#         email="giguuag@gmail.com",
+#         password="giorgi123",
+#         age=21,
+#         phone_number="+995598351432",
+#         full_username="admin_vaa",
+#         city="Gori"
+#     )
+#     return JsonResponse({"message": "Superuser created successfully."})
