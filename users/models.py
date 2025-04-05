@@ -33,7 +33,7 @@ class User(AbstractUser):
 
     email = models.EmailField(unique=True, db_index=True)
     full_username = models.CharField(max_length=100, help_text="Full user name (e.g John Doe)")
-    avatar = models.ImageField(upload_to='avatars/', default='default-boy-avatar_mca8ah.jpg', null=True)
+    avatar = models.ImageField(upload_to='avatars/', default='avatars/default-boy-avatar_mca8ah.jpg', null=True)
     age = models.IntegerField(
         validators=[
             MinValueValidator(18)
