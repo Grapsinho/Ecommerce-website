@@ -176,12 +176,16 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 
-STATIC_URL = 'static/'
-
+STATIC_URL = '/static/'
 STATIC_ROOT = Path(__file__).resolve().parents[2] / "staticfiles"
 
-MEDIA_URL = '/media/'  # URL to access media files via HTTP
-MEDIA_ROOT = os.path.join(BASE_DIR, 'static/media')  # Directory to store media files on disk
+if DEBUG:
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'static/media')
+else:
+    # For media files, since you're using Cloudinary, you don't need these:
+    MEDIA_URL = None
+    MEDIA_ROOT = None
 
 
 # Default primary key field type
