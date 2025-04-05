@@ -14,7 +14,10 @@ secret_key = os.environ.get('KEY_SECRET')
 
 SECRET_KEY = secret_key
 
-DEBUG = debug
+if debug == "True":
+    DEBUG = True
+else:
+    DEBUG = False
 
 ALLOWED_HOSTS = []
 

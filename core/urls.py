@@ -18,7 +18,7 @@ urlpatterns = [
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
-if settings.DEBUG == "True":
+if settings.DEBUG:
     import debug_toolbar
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
