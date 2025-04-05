@@ -435,6 +435,10 @@ def create_superuser_view(request):
     User.objects.create_superuser(
         username="admin",
         email="giguuag@gmail.com",
-        password="giorgi123"
+        password="giorgi123",
+        age=21,
+        phone_number="+995598351432",
+        full_username="admin_vaa",
+        city="Gori"
     )
     return JsonResponse({"message": "Superuser created successfully."})
