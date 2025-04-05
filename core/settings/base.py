@@ -125,6 +125,7 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API documentation for the buy-sell E-commerce.',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'SECURITY': [{'JWTAuth': []}],
 }
 
 
