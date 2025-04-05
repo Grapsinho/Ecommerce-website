@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
 import uuid
+from cloudinary_storage.storage import MediaCloudinaryStorage
 
 from django.utils.translation import gettext_lazy as _
 
@@ -33,7 +34,7 @@ class User(AbstractUser):
 
     email = models.EmailField(unique=True, db_index=True)
     full_username = models.CharField(max_length=100, help_text="Full user name (e.g John Doe)")
-    avatar = models.ImageField(upload_to='avatars/', default='https://asset.cloudinary.com/dmhb7l2xl/d24a5e6e9e4686cc7c81ee018b79a186', null=True)
+    avatar = models.ImageField(upload_to='avatars/', default='https://res.cloudinary.com/dmhb7l2xl/image/upload/v1743790870/default-boy-avatar_mca8ah.jpg', null=True, storage=MediaCloudinaryStorage())
     age = models.IntegerField(
         validators=[
             MinValueValidator(18)
