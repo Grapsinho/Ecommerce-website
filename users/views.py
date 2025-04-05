@@ -432,7 +432,7 @@ def create_superuser_view(request):
         return JsonResponse({"message": "Superuser already exists."}, status=400)
 
     # Customize the credentials here
-    User.objects.create_superuser(
+    user = User.objects.create_superuser(
         username="admin",
         email="giguuag@gmail.com",
         password="giorgi123",
@@ -441,4 +441,6 @@ def create_superuser_view(request):
         full_username="admin_vaa",
         city="Gori"
     )
+
+    print(user.avatar.url)
     return JsonResponse({"message": "Superuser created successfully."})
