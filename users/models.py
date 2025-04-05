@@ -3,9 +3,23 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.core.validators import MinValueValidator
 from phonenumber_field.modelfields import PhoneNumberField
 import uuid
-from cloudinary_storage.storage import MediaCloudinaryStorage
 
 from django.utils.translation import gettext_lazy as _
+
+
+from django.conf import settings
+
+# Optionally import your production storage only if needed.
+if not settings.DEBUG:
+    from cloudinary_storage.storage import MediaCloudinaryStorage
+    avatar_storage = MediaCloudinaryStorage()
+    default_avatar = 'avatars/default-boy-avatar_ykc4dn'
+    upload_to_path = ''
+else:
+    avatar_storage = None  # Using default FileSystemStorage in development.
+    default_avatar = 'avatars/default-boy-avatar.jpg'
+    upload_to_path = 'avatars/'
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -34,7 +48,12 @@ class User(AbstractUser):
 
     email = models.EmailField(unique=True, db_index=True)
     full_username = models.CharField(max_length=100, help_text="Full user name (e.g John Doe)")
-    avatar = models.ImageField(upload_to='', default='avatars/default-boy-avatar_ykc4dn', null=True, storage=MediaCloudinaryStorage())
+    avatar = models.ImageField(
+        upload_to=upload_to_path,
+        default=default_avatar,
+        null=True,
+        storage=avatar_storage
+    )
     age = models.IntegerField(
         validators=[
             MinValueValidator(18)
