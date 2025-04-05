@@ -28,7 +28,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         
-        fields = ('full_username', 'email', 'age', 'password', 'city', 'phone_number', 'avatar')
+        fields = ('full_username', 'email', 'age', 'password', 'city', 'phone_number', 'avatar', 'username')
     
     def validate_email(self, value):
         value = value.lower()
@@ -83,6 +83,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         try:
 
             user = User.objects.create_user(
+                full_username = validated_data['full_username'],
                 email=validated_data['email'],
                 password=validated_data['password'],
                 username=validated_data['username'],
