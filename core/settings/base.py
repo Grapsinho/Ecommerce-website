@@ -34,6 +34,11 @@ INSTALLED_APPS = [
 
     # local apps
     "users.apps.UsersConfig",
+    "product_management.apps.ProductManagementConfig",
+
+    # external app
+    "mptt",
+    "django_filters",
 
     # third-party apps
     'rest_framework',
@@ -107,13 +112,13 @@ REST_FRAMEWORK = {
 
 # JWT token Base configuration
 
-access_token_lifetime = os.environ.get("ACCESS_TOKEN_LIFETIME_MINUTES", 1)
-refresh_token_lifetime = os.environ.get("REFRESH_TOKEN_LIFETIME_MINUTES", 2)
+access_token_lifetime = os.environ.get("ACCESS_TOKEN_LIFETIME_MINUTES", 15)
+refresh_token_lifetime = os.environ.get("REFRESH_TOKEN_LIFETIME_MINUTES", 25)
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1), # i will change these after im done with testing
-    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=2), # i will change these after im done with testing
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(access_token_lifetime)), # i will change these after im done with testing
+    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=int(refresh_token_lifetime)), # i will change these after im done with testing
     'AUTH_HEADER_TYPES': ('Bearer',),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,

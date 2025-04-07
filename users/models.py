@@ -9,14 +9,13 @@ from django.utils.translation import gettext_lazy as _
 
 from django.conf import settings
 
-# Optionally import your production storage only if needed.
 if not settings.DEBUG:
     from cloudinary_storage.storage import MediaCloudinaryStorage
     avatar_storage = MediaCloudinaryStorage()
     default_avatar = 'avatars/default-boy-avatar_ykc4dn'
     upload_to_path = ''
 else:
-    avatar_storage = None  # Using default FileSystemStorage in development.
+    avatar_storage = None
     default_avatar = 'avatars/default-boy-avatar.jpg'
     upload_to_path = 'avatars/'
 

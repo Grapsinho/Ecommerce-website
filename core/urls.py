@@ -11,6 +11,9 @@ urlpatterns = [
     # user authentication
     path('api/', include('users.urls')),
 
+    # product management
+    path('api/', include('product_management.urls')),
+
     # YOUR PATTERNS
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:

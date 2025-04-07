@@ -98,3 +98,4 @@ class ProductMedia(models.Model):
 
 
 
+filtrebistvis price me gavgzavno magalitad aqedan aqamde da shualedebi.
