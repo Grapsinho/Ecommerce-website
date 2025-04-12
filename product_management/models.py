@@ -2,7 +2,9 @@ from django.db import models
 from users.models import User
 from mptt.models import MPTTModel, TreeForeignKey
 from utils.slug_utils import unique_slugify
-from django.utils.text import slugify
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.exceptions import ValidationError
+
 
 from django.conf import settings
 
@@ -10,12 +12,11 @@ if not settings.DEBUG:
     from cloudinary_storage.storage import MediaCloudinaryStorage
     product_image_storage = MediaCloudinaryStorage()
     default_image = 'product_images/No Image'
-    upload_to_path = 'product_image/'
+    upload_to_path = 'product_images/'
 else:
     product_image_storage = None
     default_image = 'product_images/No Image.svg'
     upload_to_path = 'product_images/'
-
 
 # Product condition choices
 CONDITION_CHOICES = (
@@ -28,18 +29,18 @@ class Category(MPTTModel):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, db_index=True)
     parent = TreeForeignKey(
-        'self', on_delete=models.CASCADE,
-        null=True, blank=True,
+        'self', 
+        on_delete=models.CASCADE,
+        null=True, 
+        blank=True,
         related_name='children',
         verbose_name="Parent Category",
     )
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)[:50]
-        
-        if not self.slug == slugify(self.name)[:50]:
-            self.slug = slugify(self.name)[:50]
+
+        if not self.pk:
+            self.slug = unique_slugify(self.name)[:50]
 
         super().save(*args, **kwargs)
 
@@ -59,8 +60,18 @@ class Product(models.Model):
     name = models.CharField(max_length=150, db_index=True)
     description = models.TextField(db_index=True)
     slug = models.SlugField(unique=True, db_index=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    stock = models.PositiveIntegerField(default=0)
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0.1)]
+    )
+    stock = models.PositiveIntegerField(
+        default=0,
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(10000)
+        ]
+    )
     condition = models.CharField(
         max_length=20, choices=CONDITION_CHOICES, default='new'
     )
@@ -68,40 +79,26 @@ class Product(models.Model):
     units_sold = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # Many-to-many relationship with categories.
-    categories = models.ManyToManyField(Category, related_name='products')
-
-
-    def clean(self):
-        """
-        Model-level validations:
-          - Ensure price is greater than $0.1.
-          - Ensure stock is greater than 1.
-          - Prevent seller changes once the product has been created.
-        """
-
-        from django.core.exceptions import ValidationError
-
-        # Validate price
-        if self.price <= 0.1:
-            raise ValidationError({'price': "Price must be greater than $0.1."})
+    
+    category = models.ForeignKey(
+        Category, 
+        on_delete=models.CASCADE,
+        related_name='products'
+    )
         
-        # Validate stock
-        if self.stock <= 1:
-            raise ValidationError({'stock': "Stock must be greater than 1."})
-
-
     def save(self, *args, **kwargs):
-        if not self.slug:
+        if not self.pk:
             self.slug = unique_slugify(self.name)[:50]
-
-        if not self.slug == unique_slugify(self.name)[:50]:
-            self.slug = unique_slugify(self.name)[:50]
-
+        
         super().save(*args, **kwargs)
+    
 
-    class Meta:
-        unique_together = ['seller', 'name']
+    # def clean(self):
+    #     super().clean()
+    #     if self.pk:
+    #         original = Product.objects.get(pk=self.pk)
+    #         if original.seller != self.seller:
+    #             raise ValidationError({'seller': "Changing the seller is not permitted."})
 
     def __str__(self):
         return self.name
@@ -122,14 +119,17 @@ class ProductMedia(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-    def save(self, *args, **kwargs):
-        # If this image is marked as featured, unmark others
+    def clean(self):
+        super().clean()
         if self.is_feature:
-            ProductMedia.objects.filter(
-                product=self.product, is_feature=True
-            ).exclude(pk=self.pk).update(is_feature=False)
-
-        super().save(*args, **kwargs)
+            existing_featured = ProductMedia.objects.filter(
+                product=self.product,
+                is_feature=True
+            ).exclude(pk=self.pk).exists()
+            if existing_featured:
+                raise ValidationError({
+                    'is_feature': "Another image is already marked as featured for this product. Unmark it first."
+                })
 
     def __str__(self):
         return f"Media for {self.product.name}"

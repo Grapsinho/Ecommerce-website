@@ -9,10 +9,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # user authentication
-    path('api/', include('users.urls')),
+    path('users/', include('users.urls')),
 
     # product management
-    path('api/', include('product_management.urls')),
+    path('products/', include('product_management.urls')),
 
     # YOUR PATTERNS
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

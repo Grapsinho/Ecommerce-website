@@ -1,0 +1,262 @@
+[
+  {
+    "model": "product_management.category",
+    "id": 1,
+    "fields": {
+      "name": "Electronics",
+      "slug": "electronics",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 2,
+    "fields": {
+      "name": "Fashion",
+      "slug": "fashion",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 3,
+    "fields": {
+      "name": "Home & Kitchen",
+      "slug": "home-kitchen",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 4,
+    "fields": {
+      "name": "Sports & Outdoors",
+      "slug": "sports-outdoors",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 5,
+    "fields": {
+      "name": "Books & Stationery",
+      "slug": "books-stationery",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 6,
+    "fields": {
+      "name": "Beauty & Personal Care",
+      "slug": "beauty-personal-care",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 7,
+    "fields": {
+      "name": "Health & Wellness",
+      "slug": "health-wellness",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 8,
+    "fields": {
+      "name": "Baby Products",
+      "slug": "baby-products",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 9,
+    "fields": {
+      "name": "Toys & Games",
+      "slug": "toys-games",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 10,
+    "fields": {
+      "name": "Pet Supplies",
+      "slug": "pet-supplies",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 11,
+    "fields": {
+      "name": "Automotive",
+      "slug": "automotive",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 12,
+    "fields": {
+      "name": "Tools & Home Improvement",
+      "slug": "tools-home-improvement",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 13,
+    "fields": {
+      "name": "Office Supplies",
+      "slug": "office-supplies",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 14,
+    "fields": {
+      "name": "Groceries",
+      "slug": "groceries",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 15,
+    "fields": {
+      "name": "Jewelry & Accessories",
+      "slug": "jewelry-accessories",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 16,
+    "fields": {
+      "name": "Music & Instruments",
+      "slug": "music-instruments",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 17,
+    "fields": {
+      "name": "Gaming",
+      "slug": "gaming",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 18,
+    "fields": {
+      "name": "Footwear",
+      "slug": "footwear",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 19,
+    "fields": {
+      "name": "Furniture",
+      "slug": "furniture",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  },
+  {
+    "model": "product_management.category",
+    "id": 20,
+    "fields": {
+      "name": "Art & Collectibles",
+      "slug": "art-collectibles",
+      "parent": null,
+      "lft": 0,
+      "rght": 0,
+      "tree_id": 0,
+      "level": 0
+    }
+  }
+]

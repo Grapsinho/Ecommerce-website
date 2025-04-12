@@ -1,68 +1,192 @@
 from django.db import transaction
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
-from rest_framework.exceptions import ValidationError
+from django.db.models import Prefetch, Max
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+
+from rest_framework import viewsets, generics
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.exceptions import APIException
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+from rest_framework.filters import OrderingFilter
+from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Product
-from .serializers import ProductSerializer, RetrieveProductSerializer
+from drf_spectacular.utils import extend_schema, extend_schema_view
+
+import logging
+
+# Import your modules
+from .models import Product, ProductMedia, Category
+from .serializers import ProductWriteSerializer, ProductRetrieveSerializer, CategorySerializer, ProductListSerializer
 from .filters import ProductFilter
 from .pagination import ProductPagination
 from users.authentication import JWTAuthentication
+from .permissions import IsOwnerOrAdmin
 
-class IsOwnerOrAdmin(BasePermission):
-    """
-    Custom permission allowing only the product owner or an admin to update or delete.
-    """
-    def has_object_permission(self, request, view, obj):
-        return (request.user == obj.seller) or request.user.is_staff
+logger = logging.getLogger("rest_framework")
 
+
+
+# -------------------------------------------------
+# API Documentation using drf-spectacular
+# -------------------------------------------------
+@extend_schema_view(
+    list=extend_schema(
+        summary="List Products",
+        description=(
+            "Retrieve a paginated list of all active products. Supports filtering by price, "
+            "condition, category, and ordering by specified fields. Uses optimized queries with related "
+            "seller, media, and category data."
+        )
+    ),
+    retrieve=extend_schema(
+        summary="Retrieve Product",
+        description=(
+            "Retrieve detailed information for a single product by its slug. Returned data includes nested images, "
+            "a category breadcrumb, and seller details."
+        )
+    ),
+    create=extend_schema(
+        summary="Create Product",
+        description=(
+            "Create a new product. The authenticated user is automatically set as the seller. Required fields "
+            "include name, description, price, stock, condition, category, and optionally images (with one featured)."
+        )
+    ),
+    update=extend_schema(
+        summary="Update Product",
+        description=(
+            "Update an existing product. Only the product owner or an admin may update the product. The operation "
+            "is performed even if the product is in an active cart."
+        )
+    ),
+    partial_update=extend_schema(
+        summary="Partial Update Product",
+        description="Partially update a product (allowed for the owner or admin)."
+    ),
+    destroy=extend_schema(
+        summary="Delete Product",
+        description=(
+            "Delete a product along with its associated media files in an atomic transaction. "
+            "This operation does not check for active cart associations."
+        )
+    ),
+)
 class ProductViewSet(viewsets.ModelViewSet):
     """
-    Product CRUD endpoints:
-      - List/Retrieve: Publicly available, showing only active products.
-      - Create/Update: Authenticated users can create/update products.
-        Updates are allowed even if the product is in an active cart.
-      - Delete: Prevented if the product is in an active cart (wrapped in an atomic transaction).
+    API endpoint for managing products.
+
+    GET requests are public (only active products are returned) and
+    enriched with related seller, media, and breadcrumb category data.
+    POST/PUT/PATCH/DELETE require JWT authentication; only the product owner or an admin can modify.
+
+    Additional enhancements:
+      - **Caching:** The list view is cached for 5 minutes.
+      - **Ordering:** Supports ordering by fields such as 'price', 'created_at', 'units_sold'.
+      - **Throttling:** Rate limiting is applied for both anonymous and authenticated users.
     """
+
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
     authentication_classes = [JWTAuthentication]
     lookup_field = 'slug'
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = ProductFilter
     pagination_class = ProductPagination
 
+    # Expose ordering fields for GET queries
+    ordering_fields = ['price', 'created_at']
+    ordering = ['created_at']  # Default ordering
+
+    # Apply throttling to all endpoints in this viewset
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
+    def get_serializer_class(self):
+        if self.request and self.request.method == 'GET':
+            if self.action == 'retrieve':
+                return ProductRetrieveSerializer
+            elif self.action == 'list':
+                return ProductListSerializer
+        return ProductWriteSerializer
+
+    def get_authenticators(self):
+        if self.request and self.request.method == 'GET':
+            return []  # Public access for GET requests.
+        return [JWTAuthentication()]
+
     def get_permissions(self):
-        if self.action in ['update', 'partial_update', 'destroy']:
+        if self.request and self.request.method in ['PUT', 'PATCH', 'DELETE']:
             return [IsAuthenticated(), IsOwnerOrAdmin()]
         return [AllowAny()]
 
     def get_queryset(self):
-
-        queryset = Product.objects.all().select_related('seller').prefetch_related('media', 'categories')
-
-        if self.action in ['list', 'retrieve']:
-            return queryset.filter(is_active=True)
+        queryset = Product.objects.select_related('seller').prefetch_related(
+            Prefetch('media', queryset=ProductMedia.objects.only('id', 'image', 'is_feature', 'created_at', 'product'))
+        ).only(
+            'id', 'name', 'description', 'slug', 'price', 'stock',
+            'condition', 'created_at', 'updated_at', 'seller', 'is_active'
+        )
+        if self.request and self.request.method == 'GET':
+            queryset = queryset.filter(is_active=True)
         return queryset
 
-    def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
-            return RetrieveProductSerializer
-        return ProductSerializer
+    @method_decorator(cache_page(60 * 3, key_prefix="product_management:product_list"), name="list")
+    def list(self, request, *args, **kwargs):
+        filtered_queryset = self.filter_queryset(self.get_queryset())
+        aggregated = filtered_queryset.aggregate(max_price=Max('price'))
+        max_price = aggregated.get('max_price') or 0.1
+
+        response = super().list(request, *args, **kwargs)
+        response.data['price_range'] = {"min_price": 0.1, "max_price": max_price}
+
+        return response
 
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
-
-    def perform_update(self, serializer):
-        serializer.save()
 
     def perform_destroy(self, instance):
         try:
             with transaction.atomic():
                 for media in instance.media.all():
-                    media.image.delete(save=False)
+                    try:
+                        media.image.delete(save=False)
+                    except Exception as e:
+                        logger.warning(
+                            f"Failed to delete image file for ProductMedia ID {media.id}: {str(e)}"
+                        )
                     media.delete()
                 instance.delete()
+
         except Exception as e:
-            raise ValidationError(f"Deletion failed: {str(e)}")
+            logger.exception(f"Error occurred during product deletion: {str(e)}")
+            raise APIException("An error occurred while deleting the product. Please try again later.")
+        
+
+class CategoryListView(generics.ListAPIView):
+    """
+    Returns top-level categories (and nested children within them).
+    """
+    queryset = Category.objects.filter(parent__isnull=True)
+    serializer_class = CategorySerializer
+
+
+class CategoryDetailView(generics.RetrieveAPIView):
+    """
+    Returns details for a specific category, including its direct children
+    and aggregated product data (such as a price range) for the category branch.
+    """
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    lookup_field = 'slug'
+
+    def retrieve(self, request, *args, **kwargs):
+        category = self.get_object()
+
+        # Get immediate children of the selected category.
+        children = category.get_children()
+        children_data = CategorySerializer(children, many=True).data
+
+        response_data = {
+            'category': CategorySerializer(category).data,
+            'children': children_data,
+        }
+        return Response(response_data)
