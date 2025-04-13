@@ -76,6 +76,11 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ["full_username", "age", "city", "phone_number"]
 
     objects = UserManager()
+
+    def save(self, *args, **kwargs):
+        self.username = self.email
+        
+        super().save(*args, **kwargs)
     
     class Meta:
         verbose_name_plural = _("Users")

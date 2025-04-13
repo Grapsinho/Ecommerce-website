@@ -59,17 +59,17 @@ class Base64ImageField(serializers.ImageField):
 # ---------------------------
 
 class CategorySerializer(serializers.ModelSerializer):
-
     children = serializers.SerializerMethodField()
 
     class Meta:
         model = Category
-        fields = ["id", "name", "slug", "parent"]
-    
+        fields = ["id", "name", "slug", "parent", "children"]
+
     def get_children(self, obj):
-        # Recursively serialize children if any exist
-        if obj.get_children():
-            serializer = CategorySerializer(obj.get_children(), many=True)
+        # With cache_tree_children, children are already fetched.
+        children = list(obj.children.all())
+        if children:
+            serializer = CategorySerializer(children, many=True)
             return serializer.data
         return []
 
@@ -216,11 +216,10 @@ class ProductRetrieveSerializer(serializers.ModelSerializer):
 
 class ProductListSerializer(serializers.ModelSerializer):
     images = ProductMediaSerializer(source='media', many=True, read_only=True)
-    seller = SellerSerializer(read_only=True)
 
     class Meta:
         model = Product
         fields = [
             'id', 'name', 'description', 'slug', 'price', 'stock', 'condition',
-            'images', 'seller', 'created_at'
+            'images', 'created_at'
         ]

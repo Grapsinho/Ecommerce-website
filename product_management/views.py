@@ -15,6 +15,8 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 
 import logging
 
+from mptt.templatetags.mptt_tags import cache_tree_children
+
 # Import your modules
 from .models import Product, ProductMedia, Category
 from .serializers import ProductWriteSerializer, ProductRetrieveSerializer, CategorySerializer, ProductListSerializer
@@ -119,12 +121,23 @@ class ProductViewSet(viewsets.ModelViewSet):
         return [AllowAny()]
 
     def get_queryset(self):
-        queryset = Product.objects.select_related('seller').prefetch_related(
-            Prefetch('media', queryset=ProductMedia.objects.only('id', 'image', 'is_feature', 'created_at', 'product'))
-        ).only(
-            'id', 'name', 'description', 'slug', 'price', 'stock',
-            'condition', 'created_at', 'updated_at', 'seller', 'is_active'
-        )
+        if self.request and self.request.method == 'GET' and self.action == 'list':
+            # For listing, we do not need seller info.
+            queryset = Product.objects.prefetch_related(
+                Prefetch('media', queryset=ProductMedia.objects.only('id', 'image', 'is_feature', 'created_at', 'product'))
+            ).only(
+                'id', 'name', 'description', 'slug', 'price', 'stock',
+                'condition', 'created_at', 'updated_at', 'is_active'
+            )
+        else:
+            # For retrieve and other methods, include seller.
+            queryset = Product.objects.select_related('seller').prefetch_related(
+                Prefetch('media', queryset=ProductMedia.objects.only('id', 'image', 'is_feature', 'created_at', 'product'))
+            ).only(
+                'id', 'name', 'description', 'slug', 'price', 'stock',
+                'condition', 'created_at', 'updated_at', 'seller', 'is_active'
+            )
+            
         if self.request and self.request.method == 'GET':
             queryset = queryset.filter(is_active=True)
         return queryset
@@ -161,32 +174,36 @@ class ProductViewSet(viewsets.ModelViewSet):
             raise APIException("An error occurred while deleting the product. Please try again later.")
         
 
-class CategoryListView(generics.ListAPIView):
+class CategoryRetrieveAPIView(generics.RetrieveAPIView):
     """
-    Returns top-level categories (and nested children within them).
+    API endpoint to retrieve a category and its children recursively.
+    The lookup is done by the category slug.
     """
-    queryset = Category.objects.filter(parent__isnull=True)
-    serializer_class = CategorySerializer
-
-
-class CategoryDetailView(generics.RetrieveAPIView):
-    """
-    Returns details for a specific category, including its direct children
-    and aggregated product data (such as a price range) for the category branch.
-    """
-    queryset = Category.objects.all()
     serializer_class = CategorySerializer
     lookup_field = 'slug'
 
-    def retrieve(self, request, *args, **kwargs):
-        category = self.get_object()
+    def get_queryset(self):
+        # Load the category along with multiple levels of children.
+        return Category.objects.all().prefetch_related(
+            'children', 'children__children', 'children__children__children'
+        )
 
-        # Get immediate children of the selected category.
-        children = category.get_children()
-        children_data = CategorySerializer(children, many=True).data
+class ParentCategoryListAPIView(generics.ListAPIView):
+    """
+    API endpoint to retrieve parent categories with their full child tree.
+    """
+    serializer_class = CategorySerializer
 
-        response_data = {
-            'category': CategorySerializer(category).data,
-            'children': children_data,
-        }
-        return Response(response_data)
+    def get_queryset(self):
+        # Prefetch several levels of children to cover your expected depth.
+        # Adjust the number of levels if needed.
+        return Category.objects.filter(parent__isnull=True).prefetch_related(
+            'children', 'children__children', 'children__children__children'
+        )
+
+    def list(self, request, *args, **kwargs):
+        qs = self.get_queryset()
+        # cache_tree_children builds a tree in memory; no extra queries are needed when serializing the tree.
+        tree = cache_tree_children(qs)
+        serializer = self.get_serializer(tree, many=True)
+        return Response(serializer.data)

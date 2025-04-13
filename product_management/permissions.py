@@ -11,4 +11,5 @@ class IsOwnerOrAdmin(BasePermission):
     This permission should be applied to update, partial_update, and delete actions.
     """
     def has_object_permission(self, request, view, obj):
+        print(request.user)
         return (request.user == obj.seller) or request.user.is_staff
