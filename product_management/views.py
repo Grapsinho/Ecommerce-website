@@ -8,18 +8,15 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import APIException
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.filters import OrderingFilter
-from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
 import logging
 
-from mptt.templatetags.mptt_tags import cache_tree_children
-
 # Import your modules
 from .models import Product, ProductMedia, Category
-from .serializers import ProductWriteSerializer, ProductRetrieveSerializer, CategorySerializer, ProductListSerializer
+from .serializers import ProductWriteSerializer, ProductRetrieveSerializer, CategorySerializer, ProductListSerializer, SimpleCategorySerializer, ProductUpdateRetrieveSerializer
 from .filters import ProductFilter
 from .pagination import ProductPagination
 from users.authentication import JWTAuthentication
@@ -103,11 +100,16 @@ class ProductViewSet(viewsets.ModelViewSet):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     def get_serializer_class(self):
+        # For GET requests, choose serializer based on action
         if self.request and self.request.method == 'GET':
             if self.action == 'retrieve':
+                # If the query parameter 'edit' is present, return the update serializer.
+                if self.request.query_params.get('edit') == 'true':
+                    return ProductUpdateRetrieveSerializer
                 return ProductRetrieveSerializer
             elif self.action == 'list':
                 return ProductListSerializer
+        # For non-GET requests use the write serializer.
         return ProductWriteSerializer
 
     def get_authenticators(self):
@@ -131,11 +133,11 @@ class ProductViewSet(viewsets.ModelViewSet):
             )
         else:
             # For retrieve and other methods, include seller.
-            queryset = Product.objects.select_related('seller').prefetch_related(
+            queryset = Product.objects.select_related('seller', 'category', 'category__parent').prefetch_related(
                 Prefetch('media', queryset=ProductMedia.objects.only('id', 'image', 'is_feature', 'created_at', 'product'))
             ).only(
                 'id', 'name', 'description', 'slug', 'price', 'stock',
-                'condition', 'created_at', 'updated_at', 'seller', 'is_active'
+                'condition', 'created_at', 'updated_at', 'seller', 'is_active', "category"
             )
             
         if self.request and self.request.method == 'GET':
@@ -190,20 +192,11 @@ class CategoryRetrieveAPIView(generics.RetrieveAPIView):
 
 class ParentCategoryListAPIView(generics.ListAPIView):
     """
-    API endpoint to retrieve parent categories with their full child tree.
+    API endpoint to retrieve parent categories without nested children.
+    This is optimized for cases where child data is not needed.
     """
-    serializer_class = CategorySerializer
+    serializer_class = SimpleCategorySerializer
 
     def get_queryset(self):
-        # Prefetch several levels of children to cover your expected depth.
-        # Adjust the number of levels if needed.
-        return Category.objects.filter(parent__isnull=True).prefetch_related(
-            'children', 'children__children', 'children__children__children'
-        )
-
-    def list(self, request, *args, **kwargs):
-        qs = self.get_queryset()
-        # cache_tree_children builds a tree in memory; no extra queries are needed when serializing the tree.
-        tree = cache_tree_children(qs)
-        serializer = self.get_serializer(tree, many=True)
-        return Response(serializer.data)
+        # Return only parent categories.
+        return Category.objects.filter(parent__isnull=True)

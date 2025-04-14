@@ -1,8 +1,9 @@
 import django_filters
+from decimal import Decimal
 from .models import Product, Category
 
 class ProductFilter(django_filters.FilterSet):
-    price_min = django_filters.NumberFilter(field_name="price", lookup_expr='gte')
+    price_min = django_filters.NumberFilter(field_name="price", lookup_expr='gte', min_value=Decimal('0.1'))
     price_max = django_filters.NumberFilter(field_name="price", lookup_expr='lte')
     condition = django_filters.CharFilter(field_name="condition", lookup_expr='iexact')
 

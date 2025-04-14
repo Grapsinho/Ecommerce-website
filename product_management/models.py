@@ -11,11 +11,9 @@ from django.conf import settings
 if not settings.DEBUG:
     from cloudinary_storage.storage import MediaCloudinaryStorage
     product_image_storage = MediaCloudinaryStorage()
-    default_image = 'product_images/No Image'
     upload_to_path = 'product_images/'
 else:
     product_image_storage = None
-    default_image = 'product_images/No Image.svg'
     upload_to_path = 'product_images/'
 
 # Product condition choices
@@ -110,7 +108,6 @@ class ProductMedia(models.Model):
     image = models.ImageField(
         upload_to=upload_to_path,
         storage=product_image_storage,
-        default=default_image
     )
     is_feature = models.BooleanField(
         default=False,

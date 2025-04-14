@@ -5,28 +5,14 @@
 
 კატეგორიების ფუნქციონალი მუშაობს კარგად
 
-////////////////////////////////////
-ეხლა ერთი ის არის დასამატებელი ან გასასწორებელი თუ როგორ ვანახოთ იუზერს კატეგორიები 
-ასევე ნელნელა დავიწყო აღწერა ყველაფრის თუ როგორ მუშაობენ ისინი, ფილტერინგი, პროდუქტ ლისტი და პროდუქტის შექმნა
-
-პროდუქტის შექმნის დროს თუ როგორ გამოვიყენოთ კატეგორიები და ამას 5ზე ვიზავ.
-
-ეს რო მორჩება ანუ პროდუქტ ლისტინგი დასრულებული იქნება, ანუ UI ს რო გავაკეთებ ვსიო შექმნა და ლისტინგი დასრულებული იქენბა და დავიწყებ ახსნების გაკეთებას მოკლედ, თუ როგორ მუშაობენ ისინი.
-
-ეს იქნება საქმე 5ის მერე.
-////////////////////////////////////
 
 
-და ესენი არის გასასწორებელი:
-
-D:\Django_saswavlo\Buy-Sell-ecommerce\product_management\serializers.py: Warning [CategoryRetrieveAPIView > CategorySerializer]: unable to resolve type hint for function "get_children". Consider using a type hint or @extend_schema_field. Defaulting to string.     
-D:\Django_saswavlo\Buy-Sell-ecommerce\product_management\serializers.py: Warning [ProductViewSet > ProductRetrieveSerializer]: unable to resolve type hint for function "get_category_breadcrumb". Consider using a type hineld. Defaulting to string.
+მოკლედ ხვალ ცოტახანი ჩავუჯდები კიდე თუ არ გაკეთდა აბდეითი მაშინ ავიღებ და ისევ base64 დავბრუნდები.
 
 
-D:\Django_saswavlo\Buy-Sell-ecommerce\venv\Lib\site-packages\rest_framework\fields.py:992: UserWarning: min_value should be a Decimal instance.
-  warnings.warn("min_value should be a Decimal instance.")
+ანუ ეს ერრორ რო დაიფიქსება ვსო მერე უკვე დარჩენილია რო რამოდენიმე რექუესთი გავგზავნო და მორჩება.
 
-
+ამით უკვე რჩება აბდეითის ტესტი და მერე გადავალ სერჩზე.
 
 
 დარჩა უფდატეს გატესტვა.
