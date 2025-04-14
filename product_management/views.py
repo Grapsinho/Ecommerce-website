@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import Prefetch, Max
+from django.db.models import Prefetch, Max, Q
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
@@ -14,13 +14,20 @@ from drf_spectacular.utils import extend_schema, extend_schema_view
 
 import logging
 
-# Import your modules
 from .models import Product, ProductMedia, Category
-from .serializers import ProductWriteSerializer, ProductRetrieveSerializer, CategorySerializer, ProductListSerializer, SimpleCategorySerializer, ProductUpdateRetrieveSerializer
+from .serializers import (
+    ProductWriteSerializer,
+    ProductRetrieveSerializer,
+    CategorySerializer,
+    ProductListSerializer,
+    SimpleCategorySerializer, 
+    ProductUpdateRetrieveSerializer
+)
 from .filters import ProductFilter
 from .pagination import ProductPagination
 from users.authentication import JWTAuthentication
 from .permissions import IsOwnerOrAdmin
+from utils.product_search import apply_full_text_search, apply_active_filter
 
 logger = logging.getLogger("rest_framework")
 
@@ -35,7 +42,8 @@ logger = logging.getLogger("rest_framework")
         description=(
             "Retrieve a paginated list of all active products. Supports filtering by price, "
             "condition, category, and ordering by specified fields. Uses optimized queries with related "
-            "seller, media, and category data."
+            "seller, media, and category data. Additionally, supports full-text search with relevance ranking "
+            "by providing a `q` parameter, and optionally searching by owner when an `owner` parameter is provided."
         )
     ),
     retrieve=extend_schema(
@@ -83,6 +91,7 @@ class ProductViewSet(viewsets.ModelViewSet):
       - **Caching:** The list view is cached for 5 minutes.
       - **Ordering:** Supports ordering by fields such as 'price', 'created_at', 'units_sold'.
       - **Throttling:** Rate limiting is applied for both anonymous and authenticated users.
+      - **Search:** Full-text search using PostgreSQL, with optional owner-based filtering.
     """
 
     queryset = Product.objects.all()
@@ -94,7 +103,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
     # Expose ordering fields for GET queries
     ordering_fields = ['price', 'created_at']
-    ordering = ['created_at']  # Default ordering
+    ordering = ['-created_at']  # Default ordering
 
     # Apply throttling to all endpoints in this viewset
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
@@ -123,25 +132,34 @@ class ProductViewSet(viewsets.ModelViewSet):
         return [AllowAny()]
 
     def get_queryset(self):
+
         if self.request and self.request.method == 'GET' and self.action == 'list':
-            # For listing, we do not need seller info.
             queryset = Product.objects.prefetch_related(
-                Prefetch('media', queryset=ProductMedia.objects.only('id', 'image', 'is_feature', 'created_at', 'product'))
+                Prefetch('media', queryset=ProductMedia.objects.filter(is_feature=True).only(
+                    'id', 'image', 'is_feature', 'created_at', 'product'
+                ))
             ).only(
                 'id', 'name', 'description', 'slug', 'price', 'stock',
                 'condition', 'created_at', 'updated_at', 'is_active'
             )
         else:
-            # For retrieve and other methods, include seller.
-            queryset = Product.objects.select_related('seller', 'category', 'category__parent').prefetch_related(
-                Prefetch('media', queryset=ProductMedia.objects.only('id', 'image', 'is_feature', 'created_at', 'product'))
+            queryset = Product.objects.select_related(
+                'seller', 'category', 'category__parent'
+            ).prefetch_related(
+                Prefetch('media', queryset=ProductMedia.objects.only(
+                    'id', 'image', 'is_feature', 'created_at', 'product'
+                ))
             ).only(
                 'id', 'name', 'description', 'slug', 'price', 'stock',
-                'condition', 'created_at', 'updated_at', 'seller', 'is_active', "category"
+                'condition', 'created_at', 'updated_at', 'seller', 'is_active', 'category'
             )
-            
-        if self.request and self.request.method == 'GET':
-            queryset = queryset.filter(is_active=True)
+
+        # Apply active filter.
+        queryset = apply_active_filter(queryset, self.request)
+
+        # Apply full-text search (if applicable).
+        queryset = apply_full_text_search(queryset, self.request)
+
         return queryset
 
     @method_decorator(cache_page(60 * 3, key_prefix="product_management:product_list"), name="list")
