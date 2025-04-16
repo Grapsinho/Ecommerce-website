@@ -13,6 +13,9 @@ urlpatterns = [
     # product management
     path('products/', include('product_management.urls')),
 
+    # review rating
+    path('reviews/', include('review_rating.urls')),
+
     # YOUR PATTERNS
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:

@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     # local apps
     "users.apps.UsersConfig",
     "product_management.apps.ProductManagementConfig",
+    "review_rating.apps.ReviewRatingConfig",
 
     # external app
     "mptt",
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
 
     "corsheaders",
 
+    # cloudinary apps
     "cloudinary",
     "cloudinary_storage",
 

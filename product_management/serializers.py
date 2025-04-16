@@ -245,7 +245,7 @@ class ProductRetrieveSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             'id', 'name', 'description', 'slug', 'price', 'stock', 'condition',
-            'images', 'category_breadcrumb', 'seller', 'created_at'
+            'images', 'category_breadcrumb', 'seller', 'created_at', "average_rating", "total_reviews"
         ]
 
     def get_category_breadcrumb(self, obj: Product) -> str:

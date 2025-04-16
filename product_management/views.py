@@ -214,7 +214,7 @@ class ProductViewSet(viewsets.ModelViewSet):
                 ))
             ).only(
                 'id', 'name', 'description', 'slug', 'price', 'stock',
-                'condition', 'created_at', 'updated_at', 'is_active'
+                'condition', 'created_at', 'updated_at', 'is_active', "average_rating", "total_reviews"
             )
         else:
             queryset = Product.objects.select_related(
