@@ -34,6 +34,11 @@ INSTALLED_APPS = [
 
     # local apps
     "users.apps.UsersConfig",
+    "product_management.apps.ProductManagementConfig",
+
+    # external app
+    "mptt",
+    "django_filters",
 
     # third-party apps
     'rest_framework',
@@ -41,6 +46,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
 
     "corsheaders",
+
+    "cloudinary",
+    "cloudinary_storage",
 
     # documentation
     'drf_spectacular',
@@ -99,17 +107,16 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '5/minute',  # Limit unauthenticated users to 5 requests per minute
-        'user': '10/minute',  # Limit authenticated users to 10 requests per minute
+        'anon': '20/minute',  # Limit unauthenticated users to 5 requests per minute
+        'user': '35/minute',  # Limit authenticated users to 10 requests per minute
         'email_confirmation': '3/minute',  # Custom throttle for email confirmation (3 requests per minute)
     },
 }
 
 # JWT token Base configuration
 
-access_token_lifetime = os.environ.get("ACCESS_TOKEN_LIFETIME_MINUTES", 15)
-refresh_token_lifetime = os.environ.get("REFRESH_TOKEN_LIFETIME_MINUTES", 25)
-
+access_token_lifetime = os.environ.get("ACCESS_TOKEN_LIFETIME_MINUTES", 10)
+refresh_token_lifetime = os.environ.get("REFRESH_TOKEN_LIFETIME_MINUTES", 20)
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(access_token_lifetime)), # i will change these after im done with testing
@@ -141,6 +148,26 @@ CACHES = {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         },
         'KEY_PREFIX': 'buy-sell-pref'  # Prefix for cache keys to avoid collisions
+    }
+}
+
+
+# changed into postgres database for development as well as production
+
+db_host = os.environ.get('DB_HOST')
+db_port = os.environ.get('DB_PORT')
+db_name = os.environ.get('DB_NAME')
+db_user = os.environ.get('DB_USER')
+db_pass = os.environ.get('DB_PASS')
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': db_name,
+        'USER': db_user,
+        'PASSWORD': db_pass,
+        'HOST': db_host,
+        'PORT': db_port,
     }
 }
 
@@ -179,14 +206,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = Path(__file__).resolve().parents[2] / "staticfiles"
 
-if DEBUG:
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'static/media')
-else:
-    # For media files, since you're using Cloudinary, you don't need these:
-    MEDIA_URL = None
-    MEDIA_ROOT = None
+# import cloudinary settings:
 
+from .cloudinary_settings import *
 
 # Default primary key field type
 

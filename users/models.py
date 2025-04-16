@@ -6,19 +6,7 @@ import uuid
 
 from django.utils.translation import gettext_lazy as _
 
-
-from django.conf import settings
-
-# Optionally import your production storage only if needed.
-if not settings.DEBUG:
-    from cloudinary_storage.storage import MediaCloudinaryStorage
-    avatar_storage = MediaCloudinaryStorage()
-    default_avatar = 'avatars/default-boy-avatar_ykc4dn'
-    upload_to_path = ''
-else:
-    avatar_storage = None  # Using default FileSystemStorage in development.
-    default_avatar = 'avatars/default-boy-avatar.jpg'
-    upload_to_path = 'avatars/'
+from cloudinary_storage.storage import MediaCloudinaryStorage
 
 
 class UserManager(BaseUserManager):
@@ -49,10 +37,10 @@ class User(AbstractUser):
     email = models.EmailField(unique=True, db_index=True)
     full_username = models.CharField(max_length=100, help_text="Full user name (e.g John Doe)")
     avatar = models.ImageField(
-        upload_to=upload_to_path,
-        default=default_avatar,
+        upload_to="avatars/",
+        default="avatars/default-boy-avatar_ykc4dn",
         null=True,
-        storage=avatar_storage
+        storage=MediaCloudinaryStorage()
     )
     age = models.IntegerField(
         validators=[
@@ -77,6 +65,11 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ["full_username", "age", "city", "phone_number"]
 
     objects = UserManager()
+
+    def save(self, *args, **kwargs):
+        self.username = self.email
+        
+        super().save(*args, **kwargs)
     
     class Meta:
         verbose_name_plural = _("Users")

@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.urls import path, include
-from django.conf.urls.static import static
 from django.conf import settings
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
@@ -9,7 +8,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # user authentication
-    path('api/', include('users.urls')),
+    path('users/', include('users.urls')),
+
+    # product management
+    path('products/', include('product_management.urls')),
 
     # YOUR PATTERNS
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
@@ -20,5 +22,4 @@ urlpatterns = [
 
 if settings.DEBUG:
     import debug_toolbar
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += [path("__debug__/", include(debug_toolbar.urls))]
