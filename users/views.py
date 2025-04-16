@@ -319,6 +319,43 @@ class UserProfileView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class CurrentUserProfileView(APIView):
+    """
+    CurrentUserProfileView
+
+    Returns the public profile information of the currently authenticated user.
+    
+    **Authentication:**
+      - Requires a valid JWT access token in HTTP-only cookies.
+    
+    **Responses:**
+      - **200 OK:** Returns the user profile data using UserProfileSerializer.
+      - **401 Unauthorized:** When the access token is missing or invalid.
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        summary="Get Current User Profile",
+        description="Returns public profile information of the currently authenticated user. No additional parameters are required.",
+        responses={
+            200: OpenApiResponse(
+                    response=UserProfileSerializer,
+                    description="Current user profile retrieved successfully."
+                ),
+            401: OpenApiResponse(
+                    description="Unauthorized. Access token is missing or invalid."
+                ),
+        },
+        tags=["Users"]
+    )
+    def get(self, request):
+        # Since the JWTAuthentication populates request.user on successful authentication,
+        # we can simply use that to get the current user's profile.
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class PasswordResetRequestView(APIView):
     """
     PasswordResetRequestView
