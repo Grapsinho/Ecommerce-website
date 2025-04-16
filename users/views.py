@@ -261,8 +261,8 @@ class LogoutUser(APIView):
             }
             response.status_code = status.HTTP_400_BAD_REQUEST
 
-        response.delete_cookie('access_token')
-        response.delete_cookie('refresh_token')
+        response.delete_cookie('access_token', samesite='None')
+        response.delete_cookie('refresh_token', samesite='None')
 
         return response
 

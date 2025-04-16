@@ -1,14 +1,14 @@
 [
   {
     "model": "product_management.product",
-    "id": 18,
+    "id": 1,
     "fields": {
       "seller": "725c3b91-86ae-4695-9463-790e6d954fd7",
-      "name": "Gadget Model A",
-      "description": "This is the description for Gadget Model A.",
-      "slug": "gadget-model-a",
-      "price": "50.99",
-      "stock": 50,
+      "name": "iPhone 14 Pro",
+      "description": "The latest Apple flagship featuring an advanced triple-camera system and A16 Bionic chip for exceptional performance.",
+      "slug": "iphone-14-pro",
+      "price": "999.99",
+      "stock": 150,
       "condition": "new",
       "category": 21,
       "created_at": "2025-04-14T12:00:00Z",
@@ -17,14 +17,14 @@
   },
   {
     "model": "product_management.product",
-    "id": 19,
+    "id": 2,
     "fields": {
       "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
-      "name": "Gadget Model B",
-      "description": "This is the description for Gadget Model B.",
-      "slug": "gadget-model-b",
-      "price": "60.99",
-      "stock": 45,
+      "name": "Dell XPS 15",
+      "description": "A high-performance laptop offering a near bezel-less display, robust build quality, and powerful internals to boost productivity.",
+      "slug": "dell-xps-15",
+      "price": "1399.99",
+      "stock": 75,
       "condition": "new",
       "category": 22,
       "created_at": "2025-04-14T12:00:00Z",
@@ -33,288 +33,208 @@
   },
   {
     "model": "product_management.product",
-    "id": 20,
+    "id": 3,
     "fields": {
       "seller": "725c3b91-86ae-4695-9463-790e6d954fd7",
-      "name": "Gadget Model C",
-      "description": "This is the description for Gadget Model C.",
-      "slug": "gadget-model-c",
-      "price": "70.99",
+      "name": "Canon EOS R6",
+      "description": "A professional mirrorless camera featuring high-speed autofocus, superb image quality, and advanced video capabilities.",
+      "slug": "canon-eos-r6",
+      "price": "2499.99",
+      "stock": 40,
+      "condition": "new",
+      "category": 23,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "id": 4,
+    "fields": {
+      "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
+      "name": "Sony Noise Cancelling Headphones",
+      "description": "Experience immersive sound with industry-leading noise cancellation technology and premium comfort design.",
+      "slug": "sony-noise-cancelling-headphones",
+      "price": "349.99",
+      "stock": 120,
+      "condition": "new",
+      "category": 24,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "id": 5,
+    "fields": {
+      "seller": "725c3b91-86ae-4695-9463-790e6d954fd7",
+      "name": "Men's Classic Leather Jacket",
+      "description": "Premium quality leather jacket combining timeless style with durability, perfect for any wardrobe.",
+      "slug": "mens-classic-leather-jacket",
+      "price": "299.99",
+      "stock": 80,
+      "condition": "new",
+      "category": 25,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "id": 6,
+    "fields": {
+      "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
+      "name": "Elegant Women's Silk Scarf",
+      "description": "A luxurious silk scarf featuring vibrant patterns and crafted with attention to detail for a refined look.",
+      "slug": "elegant-womens-silk-scarf",
+      "price": "89.99",
+      "stock": 200,
+      "condition": "new",
+      "category": 26,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "id": 7,
+    "fields": {
+      "seller": "725c3b91-86ae-4695-9463-790e6d954fd7",
+      "name": "Kids' Educational Tablet",
+      "description": "A robust and interactive tablet designed for children, offering educational apps and durable build quality.",
+      "slug": "kids-educational-tablet",
+      "price": "149.99",
+      "stock": 180,
+      "condition": "new",
+      "category": 27,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "id": 8,
+    "fields": {
+      "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
+      "name": "Fitbit Versa 3 Smartwatch",
+      "description": "A versatile smartwatch that offers comprehensive fitness tracking, heart rate monitoring, and built-in GPS.",
+      "slug": "fitbit-versa-3-smartwatch",
+      "price": "229.99",
+      "stock": 130,
+      "condition": "new",
+      "category": 28,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "id": 9,
+    "fields": {
+      "seller": "725c3b91-86ae-4695-9463-790e6d954fd7",
+      "name": "Breville Espresso Machine",
+      "description": "Engineered for consistent, cafe-quality espresso, this machine is a must-have for coffee aficionados.",
+      "slug": "breville-espresso-machine",
+      "price": "799.99",
       "stock": 60,
       "condition": "new",
-      "category": 23,
+      "category": 29,
       "created_at": "2025-04-14T12:00:00Z",
       "updated_at": "2025-04-14T12:00:00Z"
     }
   },
   {
     "model": "product_management.product",
-    "id": 21,
+    "id": 10,
     "fields": {
       "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
-      "name": "Gadget Model D",
-      "description": "This is the description for Gadget Model D.",
-      "slug": "gadget-model-d",
-      "price": "80.99",
-      "stock": 35,
+      "name": "Le Creuset Dutch Oven",
+      "description": "An iconic enameled cast iron pot, ideal for slow-cooking, braising and creating rich, savory stews.",
+      "slug": "le-creuset-dutch-oven",
+      "price": "349.99",
+      "stock": 90,
       "condition": "new",
-      "category": 24,
+      "category": 30,
       "created_at": "2025-04-14T12:00:00Z",
       "updated_at": "2025-04-14T12:00:00Z"
     }
   },
   {
     "model": "product_management.product",
-    "id": 22,
+    "id": 11,
     "fields": {
       "seller": "725c3b91-86ae-4695-9463-790e6d954fd7",
-      "name": "Gadget Model E",
-      "description": "This is the description for Gadget Model E.",
-      "slug": "gadget-model-e",
-      "price": "90.99",
-      "stock": 55,
-      "condition": "new",
-      "category": 28,
-      "created_at": "2025-04-14T12:00:00Z",
-      "updated_at": "2025-04-14T12:00:00Z"
-    }
-  },
-  {
-    "model": "product_management.product",
-    "id": 23,
-    "fields": {
-      "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
-      "name": "Gadget Model F",
-      "description": "This is the description for Gadget Model F.",
-      "slug": "gadget-model-f",
-      "price": "100.99",
-      "stock": 40,
-      "condition": "new",
-      "category": 21,
-      "created_at": "2025-04-14T12:00:00Z",
-      "updated_at": "2025-04-14T12:00:00Z"
-    }
-  },
-  {
-    "model": "product_management.product",
-    "id": 24,
-    "fields": {
-      "seller": "725c3b91-86ae-4695-9463-790e6d954fd7",
-      "name": "Gadget Model G",
-      "description": "This is the description for Gadget Model G.",
-      "slug": "gadget-model-g",
-      "price": "110.99",
-      "stock": 65,
-      "condition": "new",
-      "category": 22,
-      "created_at": "2025-04-14T12:00:00Z",
-      "updated_at": "2025-04-14T12:00:00Z"
-    }
-  },
-  {
-    "model": "product_management.product",
-    "id": 25,
-    "fields": {
-      "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
-      "name": "Gadget Model H",
-      "description": "This is the description for Gadget Model H.",
-      "slug": "gadget-model-h",
-      "price": "120.99",
+      "name": "Modern Sofa Collection",
+      "description": "A contemporary sofa set that blends comfort with clean, modern design for upscale living spaces.",
+      "slug": "modern-sofa-collection",
+      "price": "1599.99",
       "stock": 30,
       "condition": "new",
-      "category": 23,
+      "category": 31,
       "created_at": "2025-04-14T12:00:00Z",
       "updated_at": "2025-04-14T12:00:00Z"
     }
   },
   {
     "model": "product_management.product",
-    "id": 26,
-    "fields": {
-      "seller": "725c3b91-86ae-4695-9463-790e6d954fd7",
-      "name": "Gadget Model I",
-      "description": "This is the description for Gadget Model I.",
-      "slug": "gadget-model-i",
-      "price": "130.99",
-      "stock": 70,
-      "condition": "new",
-      "category": 24,
-      "created_at": "2025-04-14T12:00:00Z",
-      "updated_at": "2025-04-14T12:00:00Z"
-    }
-  },
-  {
-    "model": "product_management.product",
-    "id": 27,
+    "id": 12,
     "fields": {
       "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
-      "name": "Gadget Model J",
-      "description": "This is the description for Gadget Model J.",
-      "slug": "gadget-model-j",
-      "price": "140.99",
-      "stock": 80,
-      "condition": "new",
-      "category": 28,
-      "created_at": "2025-04-14T12:00:00Z",
-      "updated_at": "2025-04-14T12:00:00Z"
-    }
-  },
-  {
-    "model": "product_management.product",
-    "id": 28,
-    "fields": {
-      "seller": "725c3b91-86ae-4695-9463-790e6d954fd7",
-      "name": "Gadget Model K",
-      "description": "This is the description for Gadget Model K.",
-      "slug": "gadget-model-k",
-      "price": "150.99",
-      "stock": 90,
-      "condition": "new",
-      "category": 21,
-      "created_at": "2025-04-14T12:00:00Z",
-      "updated_at": "2025-04-14T12:00:00Z"
-    }
-  },
-  {
-    "model": "product_management.product",
-    "id": 29,
-    "fields": {
-      "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
-      "name": "Gadget Model L",
-      "description": "This is the description for Gadget Model L.",
-      "slug": "gadget-model-l",
-      "price": "160.99",
-      "stock": 35,
-      "condition": "new",
-      "category": 22,
-      "created_at": "2025-04-14T12:00:00Z",
-      "updated_at": "2025-04-14T12:00:00Z"
-    }
-  },
-  {
-    "model": "product_management.product",
-    "id": 30,
-    "fields": {
-      "seller": "725c3b91-86ae-4695-9463-790e6d954fd7",
-      "name": "Gadget Model M",
-      "description": "This is the description for Gadget Model M.",
-      "slug": "gadget-model-m",
-      "price": "170.99",
-      "stock": 50,
-      "condition": "new",
-      "category": 23,
-      "created_at": "2025-04-14T12:00:00Z",
-      "updated_at": "2025-04-14T12:00:00Z"
-    }
-  },
-  {
-    "model": "product_management.product",
-    "id": 31,
-    "fields": {
-      "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
-      "name": "Gadget Model N",
-      "description": "This is the description for Gadget Model N.",
-      "slug": "gadget-model-n",
-      "price": "180.99",
-      "stock": 65,
-      "condition": "new",
-      "category": 24,
-      "created_at": "2025-04-14T12:00:00Z",
-      "updated_at": "2025-04-14T12:00:00Z"
-    }
-  },
-  {
-    "model": "product_management.product",
-    "id": 32,
-    "fields": {
-      "seller": "725c3b91-86ae-4695-9463-790e6d954fd7",
-      "name": "Gadget Model O",
-      "description": "This is the description for Gadget Model O.",
-      "slug": "gadget-model-o",
-      "price": "190.99",
-      "stock": 40,
-      "condition": "new",
-      "category": 28,
-      "created_at": "2025-04-14T12:00:00Z",
-      "updated_at": "2025-04-14T12:00:00Z"
-    }
-  },
-  {
-    "model": "product_management.product",
-    "id": 33,
-    "fields": {
-      "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
-      "name": "Gadget Model P",
-      "description": "This is the description for Gadget Model P.",
-      "slug": "gadget-model-p",
-      "price": "200.99",
+      "name": "Luxury Bedding Set",
+      "description": "A premium bedding ensemble crafted from high thread count cotton for a sumptuous sleep experience.",
+      "slug": "luxury-bedding-set",
+      "price": "499.99",
       "stock": 55,
       "condition": "new",
-      "category": 21,
+      "category": 32,
       "created_at": "2025-04-14T12:00:00Z",
       "updated_at": "2025-04-14T12:00:00Z"
     }
   },
   {
     "model": "product_management.product",
-    "id": 34,
+    "id": 13,
     "fields": {
       "seller": "725c3b91-86ae-4695-9463-790e6d954fd7",
-      "name": "Gadget Model Q",
-      "description": "This is the description for Gadget Model Q.",
-      "slug": "gadget-model-q",
-      "price": "210.99",
+      "name": "Nordic Treadmill Pro",
+      "description": "A state-of-the-art treadmill designed for intense home workouts and endurance training.",
+      "slug": "nordic-treadmill-pro",
+      "price": "1899.99",
+      "stock": 20,
+      "condition": "new",
+      "category": 33,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "id": 14,
+    "fields": {
+      "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
+      "name": "Camping Tent for 4",
+      "description": "A spacious, durable four-person tent designed for family adventures and reliable performance in the outdoors.",
+      "slug": "camping-tent-for-4",
+      "price": "299.99",
       "stock": 70,
       "condition": "new",
-      "category": 22,
+      "category": 34,
       "created_at": "2025-04-14T12:00:00Z",
       "updated_at": "2025-04-14T12:00:00Z"
     }
   },
   {
     "model": "product_management.product",
-    "id": 35,
-    "fields": {
-      "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
-      "name": "Gadget Model R",
-      "description": "This is the description for Gadget Model R.",
-      "slug": "gadget-model-r",
-      "price": "220.99",
-      "stock": 80,
-      "condition": "new",
-      "category": 23,
-      "created_at": "2025-04-14T12:00:00Z",
-      "updated_at": "2025-04-14T12:00:00Z"
-    }
-  },
-  {
-    "model": "product_management.product",
-    "id": 36,
+    "id": 15,
     "fields": {
       "seller": "725c3b91-86ae-4695-9463-790e6d954fd7",
-      "name": "Gadget Model S",
-      "description": "This is the description for Gadget Model S.",
-      "slug": "gadget-model-s",
-      "price": "230.99",
-      "stock": 90,
+      "name": "Specialized Road Bike",
+      "description": "A high-performance road bike engineered for competitive cyclists, featuring lightweight materials and precision engineering.",
+      "slug": "specialized-road-bike",
+      "price": "2499.99",
+      "stock": 15,
       "condition": "new",
-      "category": 24,
-      "created_at": "2025-04-14T12:00:00Z",
-      "updated_at": "2025-04-14T12:00:00Z"
-    }
-  },
-  {
-    "model": "product_management.product",
-    "id": 37,
-    "fields": {
-      "seller": "431aa2dd-547f-4c9b-b962-c5150708f1f9",
-      "name": "Gadget Model T",
-      "description": "This is the description for Gadget Model T.",
-      "slug": "gadget-model-t",
-      "price": "240.99",
-      "stock": 100,
-      "condition": "new",
-      "category": 28,
+      "category": 35,
       "created_at": "2025-04-14T12:00:00Z",
       "updated_at": "2025-04-14T12:00:00Z"
     }

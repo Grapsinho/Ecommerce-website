@@ -10,8 +10,9 @@ from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
-from drf_spectacular.utils import extend_schema, extend_schema_view
-
+from drf_spectacular.utils import (
+    extend_schema, extend_schema_view, OpenApiParameter, OpenApiExample, OpenApiTypes
+)
 import logging
 
 from .models import Product, ProductMedia, Category
@@ -34,17 +35,31 @@ logger = logging.getLogger("rest_framework")
 
 
 # -------------------------------------------------
-# API Documentation using drf-spectacular
+# Product CRUD viewSet
 # -------------------------------------------------
 @extend_schema_view(
     list=extend_schema(
         summary="List Products",
         description=(
-            "Retrieve a paginated list of all active products. Supports filtering by price, "
-            "condition, category, and ordering by specified fields. Uses optimized queries with related "
-            "seller, media, and category data. Additionally, supports full-text search with relevance ranking "
-            "by providing a `q` parameter, and optionally searching by owner when an `owner` parameter is provided."
-        )
+            "Retrieve a paginated list of all active products. Supports filtering by price, condition, "
+            "category, and ordering by specified fields. Uses optimized queries with related seller, media, and "
+            "category data. Additionally, supports full-text search with relevance ranking by providing a `q` parameter, "
+            "and optionally filtering by owner using the `owner` parameter."
+        ),
+        parameters=[
+            OpenApiParameter(
+                name="q",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="Full-text search parameter."
+            ),
+            OpenApiParameter(
+                name="owner",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                description="Filter products by owner (user) ID."
+            )
+        ]
     ),
     retrieve=extend_schema(
         summary="Retrieve Product",
@@ -56,20 +71,79 @@ logger = logging.getLogger("rest_framework")
     create=extend_schema(
         summary="Create Product",
         description=(
-            "Create a new product. The authenticated user is automatically set as the seller. Required fields "
-            "include name, description, price, stock, condition, category, and optionally images (with one featured)."
-        )
+            "Create a new product. The authenticated user is automatically set as the seller. Required fields include "
+            "name, description, price, stock, condition, and category. \n\n"
+            "**Images:**\n"
+            "- Images must be submitted as part of a multipart/form-data request using the key `images`.\n"
+            "- You must upload at least one image and no more than six images.\n"
+            "- Optionally, use the query parameter `featured_index` (an integer, default is 0) to indicate which "
+            "uploaded image should be marked as featured.\n\n"
+            "For example, if you upload three images and set `featured_index=1`, the second image will be designated "
+            "as the featured image."
+        ),
+        parameters=[
+            OpenApiParameter(
+                name="featured_index",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="Index of the image to mark as featured (default is 0)."
+            )
+        ],
+        examples=[
+            OpenApiExample(
+                name="Create Product Example",
+                description="Example payload for creating a product. Ensure to send images as files via multipart/form-data.",
+                value={
+                    "name": "Wireless Headphones",
+                    "description": "Over-ear noise-cancelling headphones.",
+                    "price": 199.99,
+                    "stock": 25,
+                    "condition": "new",
+                    "category": 1,
+                    "featured_index": 1
+                },
+                request_only=True,
+            )
+        ]
     ),
     update=extend_schema(
         summary="Update Product",
+        request=ProductWriteSerializer,
+        responses=ProductRetrieveSerializer,
         description=(
-            "Update an existing product. Only the product owner or an admin may update the product. The operation "
-            "is performed even if the product is in an active cart."
-        )
+            "Update an existing product along with its images. If no `images_metadata` key is provided in the request, "
+            "the existing images will remain unchanged. \n\n"
+            "When updating images, supply an `images_metadata` JSON array as part of the request body. Each element in the "
+            "array must be a dictionary following these rules:\n\n"
+            " - **Updating an Existing Image:** Include an `id` key with the image's ID and an optional `is_feature` boolean to set its featured status.\n\n"
+            " - **Adding a New Image:** Include an `index` key (a zero-based position indicating which file to use from the uploaded files) "
+            "and an optional `is_feature` flag.\n\n"
+            "Any existing image not referenced in the provided metadata will be deleted. Also, ensure that the number of new image "
+            "files uploaded matches the number of metadata items that require new files."
+        ),
+        examples=[
+            OpenApiExample(
+                name="Update Product Example",
+                description=(
+                    "Example payload for updating a product:\n"
+                    "```\n"
+                    '[{"id": 10, "is_feature": false}, {"index": 0, "is_feature": true}]\n'
+                    "```\n"
+                    "This example updates an existing image (with ID 10, not featured) and creates a new image (from the first uploaded file), marked as featured."
+                ),
+                value={
+                    "name": "Updated Product Name",
+                    "price": 149.99,
+                    "images_metadata": '[{"id": 10, "is_feature": false}, {"index": 0, "is_feature": true}]'
+                },
+                request_only=True,
+            )
+        ]
     ),
     partial_update=extend_schema(
         summary="Partial Update Product",
-        description="Partially update a product (allowed for the owner or admin)."
+        description="Partially update a product (allowed for the product owner or an admin)."
     ),
     destroy=extend_schema(
         summary="Delete Product",
@@ -77,7 +151,7 @@ logger = logging.getLogger("rest_framework")
             "Delete a product along with its associated media files in an atomic transaction. "
             "This operation does not check for active cart associations."
         )
-    ),
+    )
 )
 class ProductViewSet(viewsets.ModelViewSet):
     """
@@ -162,7 +236,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-    @method_decorator(cache_page(60 * 3, key_prefix="product_management:product_list"), name="list")
+    @method_decorator(cache_page(60 * 2, key_prefix="product_management:product_list"), name="list")
     def list(self, request, *args, **kwargs):
         filtered_queryset = self.filter_queryset(self.get_queryset())
         aggregated = filtered_queryset.aggregate(max_price=Max('price'))

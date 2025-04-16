@@ -9,6 +9,10 @@ from users.models import User
 from .models import Product, ProductMedia, Category
 from utils.image_opt import process_uploaded_file, validate_uploaded_file
 
+import logging
+
+logger = logging.getLogger("rest_framework")
+
 
 # ---------------------------
 # Category Serializer
@@ -78,7 +82,7 @@ class ProductMediaSerializer(serializers.ModelSerializer):
 # ---------------------------
 
 class ProductWriteSerializer(serializers.ModelSerializer):
-    # Remove the nested "images" field – files will be retrieved directly from request.FILES.
+    # Remove nested "images" field – files are handled via request.FILES.
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
 
     class Meta:
@@ -102,17 +106,17 @@ class ProductWriteSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         request = self.context.get('request')
         images = request.FILES.getlist('images')
-        # Enforce mandatory images only for creation.
         if self.instance is None:
+            # Creation requires at least one image and no more than 6.
             if not images:
                 raise ValidationError({"images": "At least one product image is required."})
             if len(images) > 6:
                 raise ValidationError({"images": "A product cannot have more than 6 images."})
             for file in images:
                 validate_uploaded_file(file)
-        # For updates, new images are optional; if provided, validate them.
-        elif images:
-            if len(images) > 6:
+        else:
+            # On update, if new images are provided, validate the count and each file.
+            if images and len(images) > 6:
                 raise ValidationError({"images": "A product cannot have more than 6 images."})
             for file in images:
                 validate_uploaded_file(file)
@@ -129,7 +133,6 @@ class ProductWriteSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             product = Product.objects.create(**validated_data)
             for idx, file in enumerate(images_files):
-                # Optimize the file only during creation.
                 optimized_file = process_uploaded_file(file)
                 is_feature = (idx == featured_index)
                 ProductMedia.objects.create(product=product, image=optimized_file, is_feature=is_feature)
@@ -139,61 +142,89 @@ class ProductWriteSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         images_metadata_json = request.data.get('images_metadata')
 
-        # If no images metadata is provided, assume the images remain unchanged.
-        if not images_metadata_json:
-            for attr, value in validated_data.items():
-                setattr(instance, attr, value)
-            instance.save()
-            return instance
-
-        # Otherwise process images metadata for update.
         try:
-            images_metadata = json.loads(images_metadata_json)
-        except json.JSONDecodeError:
-            raise ValidationError({"images_metadata": "Invalid JSON format."})
+            with transaction.atomic():
+                self._apply_validated_fields(instance, validated_data)
 
-        new_images_files = request.FILES.getlist('images')
-        new_file_pointer = 0
+                if images_metadata_json:
+                    metadata = self._parse_images_metadata(images_metadata_json)
+                    self._update_product_images(instance, metadata, request)
+            return instance
+        except Exception as exc:
+            logger.exception('Error updating Product ID %s: %s', instance.id, exc)
+            raise
 
-        # Build a dictionary of existing media.
-        existing_media_dict = {media.id: media for media in instance.media.all()}
-
-        # Process the metadata to update or add images.
-        for meta in images_metadata:
-            if 'id' in meta:
-                # Update existing image.
-                media_id = meta['id']
-                media_obj = existing_media_dict.get(media_id)
-                if media_obj:
-                    media_obj.is_feature = meta.get('is_feature', False)
-                    media_obj.save()
-                    del existing_media_dict[media_id]
-            elif 'index' in meta:
-                # Add a new image.
-                if new_file_pointer >= len(new_images_files):
-                    raise ValidationError("Mismatch between new images metadata and files provided.")
-                file = new_images_files[new_file_pointer]
-                optimized_file = process_uploaded_file(file)
-                is_feature = meta.get('is_feature', False)
-                ProductMedia.objects.create(product=instance, image=optimized_file, is_feature=is_feature)
-                new_file_pointer += 1
-            else:
-                raise ValidationError("Each images_metadata item must have either 'id' or 'index'.")
-
-        # Delete any remaining (unreferenced) existing media.
-        for media in existing_media_dict.values():
-            try:
-                media.image.delete(save=False)
-            except Exception:
-                pass
-            media.delete()
-
-        # Update non-image fields.
+    def _apply_validated_fields(self, instance, validated_data):
+        """
+        Apply updated fields from validated_data onto the instance and save.
+        """
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        return instance
+    def _parse_images_metadata(self, images_metadata_json):
+        """
+        Validate and parse the images_metadata JSON.
+        """
+        try:
+            metadata = json.loads(images_metadata_json)
+        except json.JSONDecodeError as e:
+            raise ValidationError({
+                "images_metadata": f"Invalid JSON: {str(e)}. Please ensure the value is a properly formatted JSON list."
+            })
+
+        if not isinstance(metadata, list):
+            raise ValidationError({
+                "images_metadata": "Expected a list of metadata dictionaries, got something else."
+            })
+        return metadata
+
+    def _update_product_images(self, instance, metadata, request):
+        new_images_files = request.FILES.getlist('images')
+        new_file_index = 0
+        # Build a dict of current media for quick lookup.
+        existing_media = {media.id: media for media in instance.media.all()}
+
+        for idx, meta in enumerate(metadata):
+            if not isinstance(meta, dict):
+                raise ValidationError({"images_metadata": f"Metadata item at index {idx} is not valid."})
+
+            if 'id' in meta:
+                media_id = meta.get('id')
+                media_obj = existing_media.get(media_id)
+                if not media_obj:
+                    raise ValidationError({"images_metadata": f"No existing image with id {media_id} found."})
+                media_obj.is_feature = meta.get('is_feature', False)
+                media_obj.save()
+                # Remove processed media.
+                existing_media.pop(media_id)
+                
+            elif 'index' in meta:
+                if new_file_index >= len(new_images_files):
+                    raise ValidationError({"images_metadata": "Mismatch between images_metadata and uploaded files."})
+                file = new_images_files[new_file_index]
+                optimized_file = process_uploaded_file(file)
+                is_feature = meta.get('is_feature', False)
+                ProductMedia.objects.create(product=instance, image=optimized_file, is_feature=is_feature)
+                new_file_index += 1
+            else:
+                raise ValidationError({"images_metadata": "Each metadata item must include either 'id' or 'index'."})
+
+        # Delete any existing media not referenced in metadata.
+        # But only delete if deletion won't remove all images.
+        for media_obj in list(existing_media.values()):
+            if instance.media.count() - 1 <= 0:
+                # Prevent deletion that would remove the last image.
+                raise ValidationError({"images": "A product must have at least one image."})
+            try:
+                media_obj.image.delete(save=False)
+            except Exception as e:
+                logger.warning('Failed to delete image for ProductMedia ID %s: %s', media_obj.id, e)
+
+            media_obj.delete()
+
+        if new_file_index < len(new_images_files):
+            raise ValidationError({"images": "There are more uploaded files than metadata instructions provided."})
 
 
 

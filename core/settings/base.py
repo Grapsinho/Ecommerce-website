@@ -47,6 +47,9 @@ INSTALLED_APPS = [
 
     "corsheaders",
 
+    "cloudinary",
+    "cloudinary_storage",
+
     # documentation
     'drf_spectacular',
 ]
@@ -104,16 +107,16 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '10/minute',  # Limit unauthenticated users to 5 requests per minute
-        'user': '15/minute',  # Limit authenticated users to 10 requests per minute
+        'anon': '20/minute',  # Limit unauthenticated users to 5 requests per minute
+        'user': '35/minute',  # Limit authenticated users to 10 requests per minute
         'email_confirmation': '3/minute',  # Custom throttle for email confirmation (3 requests per minute)
     },
 }
 
 # JWT token Base configuration
 
-access_token_lifetime = os.environ.get("ACCESS_TOKEN_LIFETIME_MINUTES", 15)
-refresh_token_lifetime = os.environ.get("REFRESH_TOKEN_LIFETIME_MINUTES", 25)
+access_token_lifetime = os.environ.get("ACCESS_TOKEN_LIFETIME_MINUTES", 10)
+refresh_token_lifetime = os.environ.get("REFRESH_TOKEN_LIFETIME_MINUTES", 20)
 
 
 SIMPLE_JWT = {
@@ -204,14 +207,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = Path(__file__).resolve().parents[2] / "staticfiles"
 
-if DEBUG:
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'static/media')
-else:
-    # For media files, since you're using Cloudinary, you don't need these:
-    MEDIA_URL = None
-    MEDIA_ROOT = None
+# import cloudinary settings:
 
+from .cloudinary_settings import *
 
 # Default primary key field type
 

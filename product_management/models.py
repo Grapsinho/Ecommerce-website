@@ -3,18 +3,9 @@ from users.models import User
 from mptt.models import MPTTModel, TreeForeignKey
 from utils.slug_utils import unique_slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.exceptions import ValidationError
+from django.db.models import Q
 
-
-from django.conf import settings
-
-if not settings.DEBUG:
-    from cloudinary_storage.storage import MediaCloudinaryStorage
-    product_image_storage = MediaCloudinaryStorage()
-    upload_to_path = 'product_images/'
-else:
-    product_image_storage = None
-    upload_to_path = 'product_images/'
+from cloudinary_storage.storage import MediaCloudinaryStorage
 
 # Product condition choices
 CONDITION_CHOICES = (
@@ -64,7 +55,6 @@ class Product(models.Model):
         validators=[MinValueValidator(0.1)]
     )
     stock = models.PositiveIntegerField(
-        default=0,
         validators=[
             MinValueValidator(1),
             MaxValueValidator(10000)
@@ -106,8 +96,8 @@ class ProductMedia(models.Model):
         Product, on_delete=models.CASCADE, related_name='media'
     )
     image = models.ImageField(
-        upload_to=upload_to_path,
-        storage=product_image_storage,
+        upload_to="product_images/",
+        storage=MediaCloudinaryStorage(),
     )
     is_feature = models.BooleanField(
         default=False,
@@ -116,17 +106,14 @@ class ProductMedia(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-    def clean(self):
-        super().clean()
-        if self.is_feature:
-            existing_featured = ProductMedia.objects.filter(
-                product=self.product,
-                is_feature=True
-            ).exclude(pk=self.pk).exists()
-            if existing_featured:
-                raise ValidationError({
-                    'is_feature': "Another image is already marked as featured for this product. Unmark it first."
-                })
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['product'],
+                condition=Q(is_feature=True),
+                name='unique_featured_image_per_product'
+            )
+        ]
 
     def __str__(self):
         return f"Media for {self.product.name}"
