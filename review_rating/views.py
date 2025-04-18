@@ -39,7 +39,7 @@ class ReviewListCreateAPIView(generics.ListCreateAPIView):
     permission_classes = [IsOwnerOrAdmin]
 
     def get_authenticators(self):
-        if self.request.method in SAFE_METHODS:
+        if self.request and self.request.method in SAFE_METHODS:
             return []
         return super().get_authenticators()
     
@@ -82,7 +82,7 @@ class ReviewDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     lookup_url_kwarg = 'review_id'
 
     def get_authenticators(self):
-        if self.request.method in SAFE_METHODS:
+        if self.request and self.request.method in SAFE_METHODS:
             return []
         return super().get_authenticators()
 

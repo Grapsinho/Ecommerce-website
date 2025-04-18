@@ -16,6 +16,9 @@ urlpatterns = [
     # review rating
     path('reviews/', include('review_rating.urls')),
 
+    # wishlist
+    path('wishlist/', include('wishlist_app.urls')),
+
     # YOUR PATTERNS
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:

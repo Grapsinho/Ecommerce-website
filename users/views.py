@@ -3,7 +3,7 @@ import logging
 
 from django.conf import settings
 from django.core.cache import cache
-from django.core.mail import send_mail
+from django.core.mail import send_mail, get_connection
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 from rest_framework import generics, status
@@ -100,12 +100,17 @@ class EmailConfirmationView(APIView):
             "Please enter this code within the next 60 seconds to confirm your email.\n"
             "If you did not request this, please ignore this email."
         )
-        from_email = settings.EMAIL_HOST_USER
+        from_email = settings.DEFAULT_FROM_EMAIL
 
         try:
             send_mail(subject, text_content, from_email, [email])
             logger.info(f"Confirmation code sent to {email}")
         except Exception as e:
+            conn = get_connection()
+            logger.error("▶︎ Settings module: %r", settings.SETTINGS_MODULE)
+
+            logger.error(f"Email connection backend: {conn!r}")
+            logger.error(f"Connection class: {conn.__class__}")
             logger.error(f"Failed to send email to {email}: {str(e)}")
             return Response({"detail": "Failed to send email. Try again later."},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)

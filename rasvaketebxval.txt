@@ -8,3 +8,14 @@
 
 
 GET /products/shop/items/?price_min=21&price_max=70&condition=&category=pet-supplies
+
+
+from anymail.exceptions import AnymailRequestsAPIError
+
+try:
+    send_mail("Hi", "Test", "forsendingemails1@gmail.com", ["giguuag@gmail.com"])
+except AnymailRequestsAPIError as e:
+    # e.response is the `requests.Response` object
+    body = e.response.json() if e.response.headers.get("Content-Type","").startswith("application/json") else e.response.text
+    print("Mailgun HTTP %s response: %s", e.response.status_code, body)
+    raise
