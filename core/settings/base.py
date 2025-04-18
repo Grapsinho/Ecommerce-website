@@ -256,18 +256,3 @@ LOGGING = {
         },
     },
 }
-
-# email sending configuration
-email_backend = os.environ.get('EMAIL_BACKEND')
-email_host = os.environ.get('EMAIL_HOST')
-email_use_tls = os.environ.get('EMAIL_USE_TLS')
-email_port = os.environ.get('EMAIL_PORT')
-email_host_user = os.environ.get('DEFAULT_FROM_EMAIL')
-email_host_password = os.environ.get('EMAIL_HOST_PASSWORD')
-
-EMAIL_BACKEND = email_backend
-EMAIL_HOST = email_host
-EMAIL_USE_TLS = email_use_tls
-EMAIL_PORT = email_port
-DEFAULT_FROM_EMAIL = email_host_user
-EMAIL_HOST_PASSWORD = email_host_password
