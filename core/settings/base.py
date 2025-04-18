@@ -110,9 +110,9 @@ REST_FRAMEWORK = {
     ],
 
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '20/minute',  # Limit unauthenticated users to 5 requests per minute
-        'user': '35/minute',  # Limit authenticated users to 10 requests per minute
-        'email_confirmation': '3/minute',  # Custom throttle for email confirmation (3 requests per minute)
+        'anon': '20/minute',
+        'user': '35/minute',
+        'email_confirmation': '3/minute',
     },
 }
 

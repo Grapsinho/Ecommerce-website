@@ -1,13 +1,11 @@
 from rest_framework import generics
 from .models import Review
-from product_management.models import Product
 from .serializers import ReviewSerializer
 from .permissions import IsOwnerOrAdmin
 from users.authentication import JWTAuthentication
 
 from rest_framework.pagination import LimitOffsetPagination
 
-from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from drf_spectacular.utils import (
