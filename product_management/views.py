@@ -33,6 +33,14 @@ from utils.product_search import apply_full_text_search, apply_active_filter
 logger = logging.getLogger("rest_framework")
 
 
+from django.conf import settings
+from django.core.management import call_command
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import IsAdminUser
+import os
+
 
 # -------------------------------------------------
 # Product CRUD viewSet
@@ -292,3 +300,55 @@ class ParentCategoryListAPIView(generics.ListAPIView):
     def get_queryset(self):
         # Return only parent categories.
         return Category.objects.filter(parent__isnull=True)
+
+
+class LoadParentCategories(APIView):
+    """
+    POST to this endpoint will load the parent_categories.json fixture into the database.
+    """
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+        PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../../"))
+        PARENT_CATEGORY_FIXTURES_FILE = os.path.join(PROJECT_ROOT, "fixtures", "category_fixtures", "parent_categories.json")
+        # Use Django's loaddata management command
+        call_command('loaddata', PARENT_CATEGORY_FIXTURES_FILE)
+        return Response(
+            {'detail': 'Parent categories loaded.'},
+            status=status.HTTP_200_OK
+        )
+
+
+class LoadChildCategories(APIView):
+    """
+    POST to this endpoint will load the child_categories.json fixture into the database.
+    """
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+        PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../../"))
+        CHILD_CATEGORY_FIXTURES_FILE = os.path.join(PROJECT_ROOT, "fixtures", "category_fixtures", "child_categories.json")
+        
+        call_command('loaddata', CHILD_CATEGORY_FIXTURES_FILE)
+        return Response(
+            {'detail': 'Child categories loaded.'},
+            status=status.HTTP_200_OK
+        )
+
+
+class RebuildCategories(APIView):
+    """
+    POST to this endpoint will rebuild the MPTT tree for Category model.
+    """
+    permission_classes = [IsAdminUser]
+
+    def post(self, request):
+        from product_management.models import Category
+        # Rebuild the tree structure
+        Category.objects.rebuild()
+        return Response(
+            {'detail': 'Category tree rebuilt.'},
+            status=status.HTTP_200_OK
+        )
