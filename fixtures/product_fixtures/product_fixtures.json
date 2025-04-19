@@ -1,7 +1,7 @@
 [
   {
     "model": "product_management.product",
-    "id": 1,
+    "pk": 1,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "iPhone 14 Pro",
@@ -17,7 +17,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 2,
+    "pk": 2,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Dell XPS 15",
@@ -33,7 +33,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 3,
+    "pk": 3,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Canon EOS R6",
@@ -49,7 +49,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 4,
+    "pk": 4,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Sony Noise Cancelling Headphones",
@@ -65,7 +65,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 5,
+    "pk": 5,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Men's Classic Leather Jacket",
@@ -81,7 +81,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 6,
+    "pk": 6,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Elegant Women's Silk Scarf",
@@ -97,7 +97,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 7,
+    "pk": 7,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Kids' Educational Tablet",
@@ -113,7 +113,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 8,
+    "pk": 8,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Fitbit Versa 3 Smartwatch",
@@ -129,7 +129,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 9,
+    "pk": 9,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Breville Espresso Machine",
@@ -145,7 +145,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 10,
+    "pk": 10,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Le Creuset Dutch Oven",
@@ -161,7 +161,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 11,
+    "pk": 11,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "Modern Sofa Collection",
@@ -177,7 +177,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 12,
+    "pk": 12,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "Luxury Bedding Set",
@@ -193,7 +193,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 13,
+    "pk": 13,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "Nordic Treadmill Pro",
@@ -209,7 +209,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 14,
+    "pk": 14,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "Camping Tent for 4",
@@ -225,7 +225,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 15,
+    "pk": 15,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "Specialized Road Bike",
@@ -241,7 +241,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 16,
+    "pk": 16,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "Samsung Galaxy S23",
@@ -257,7 +257,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 17,
+    "pk": 17,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "HP Spectre x360 14",
@@ -273,7 +273,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 18,
+    "pk": 18,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "Nikon Z7 II Mirrorless",
@@ -289,7 +289,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 19,
+    "pk": 19,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "Fossil Gen 6 Smartwatch",
@@ -305,7 +305,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 20,
+    "pk": 20,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "Levi's Men's Denim Jacket",
@@ -321,7 +321,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 21,
+    "pk": 21,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Calvin Klein Women's Summer Dress",
@@ -337,7 +337,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 22,
+    "pk": 22,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Lego Star Wars Millennium Falcon",
@@ -353,7 +353,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 23,
+    "pk": 23,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Ravensburger 1000-Piece Puzzle",
@@ -369,7 +369,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 24,
+    "pk": 24,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "Bose QuietComfort Earbuds",
@@ -385,7 +385,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 25,
+    "pk": 25,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "KitchenAid Stand Mixer",
@@ -401,7 +401,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 26,
+    "pk": 26,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "Ikea Malm Bed Frame",
@@ -417,7 +417,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 27,
+    "pk": 27,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Adidas Ultraboost Running Shoes",
@@ -433,7 +433,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 28,
+    "pk": 28,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "Sony PlayStation 5",
@@ -449,7 +449,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 29,
+    "pk": 29,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
       "name": "Brother HL-L2350DW Laser Printer",
@@ -465,7 +465,7 @@
   },
   {
     "model": "product_management.product",
-    "id": 30,
+    "pk": 30,
     "fields": {
       "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
       "name": "Garmin Forerunner 955",
@@ -482,7 +482,7 @@
   [
     {
       "model": "product_management.product",
-      "id": 31,
+      "pk": 31,
       "fields": {
         "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
         "name": "Google Pixel 7 Pro",
@@ -498,7 +498,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 32,
+      "pk": 32,
       "fields": {
         "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
         "name": "Lenovo ThinkPad X1 Carbon",
@@ -514,7 +514,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 33,
+      "pk": 33,
       "fields": {
         "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
         "name": "DJI Mavic Air 2 Drone",
@@ -530,7 +530,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 34,
+      "pk": 34,
       "fields": {
         "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
         "name": "Ray-Ban Aviator Sunglasses",
@@ -546,7 +546,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 35,
+      "pk": 35,
       "fields": {
         "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
         "name": "Herman Miller Aeron Chair",
@@ -562,7 +562,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 36,
+      "pk": 36,
       "fields": {
         "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
         "name": "Casper Essential Mattress",
@@ -578,7 +578,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 37,
+      "pk": 37,
       "fields": {
         "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
         "name": "Nike Dri-FIT Running Shorts",
@@ -594,7 +594,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 38,
+      "pk": 38,
       "fields": {
         "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
         "name": "Apple AirPods Pro",
@@ -610,7 +610,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 39,
+      "pk": 39,
       "fields": {
         "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
         "name": "KitchenAid Food Processor",
@@ -626,7 +626,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 40,
+      "pk": 40,
       "fields": {
         "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
         "name": "Breville Smart Oven",
@@ -642,7 +642,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 41,
+      "pk": 41,
       "fields": {
         "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
         "name": "Lego Creator Expert Building Kit",
@@ -658,7 +658,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 42,
+      "pk": 42,
       "fields": {
         "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
         "name": "The Art of Photography Book",
@@ -674,7 +674,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 43,
+      "pk": 43,
       "fields": {
         "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
         "name": "Clinique Moisture Surge Serum",
@@ -690,7 +690,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 44,
+      "pk": 44,
       "fields": {
         "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
         "name": "Bose SoundLink Revolve+ Speaker",
@@ -706,7 +706,7 @@
     },
     {
       "model": "product_management.product",
-      "id": 45,
+      "pk": 45,
       "fields": {
         "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
         "name": "Fitbit Inspire 2 Fitness Tracker",
