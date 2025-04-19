@@ -22,6 +22,9 @@ urlpatterns = [
     # cart
     path('cart/', include('product_cart.urls')),
 
+    # chat
+    path('chat/', include('chat_app.urls')),
+
     # YOUR PATTERNS
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:

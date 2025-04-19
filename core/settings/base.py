@@ -25,6 +25,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,6 +40,7 @@ INSTALLED_APPS = [
     "review_rating.apps.ReviewRatingConfig",
     "wishlist_app.apps.WishlistAppConfig",
     "product_cart.apps.ProductCartConfig",
+    "chat_app.apps.ChatAppConfig",
 
     # external app
     "mptt",
@@ -92,6 +95,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
+
+ASGI_APPLICATION = 'core.asgi.application'
 
 # custom user
 AUTH_USER_MODEL = "users.User"
@@ -155,6 +160,16 @@ CACHES = {
     }
 }
 
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [redis_url],
+        },
+    },
+}
 
 # changed into postgres database for development as well as production
 
