@@ -38,7 +38,6 @@ from django.core.management import call_command
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAdminUser
 import os
 
 
@@ -301,22 +300,22 @@ class ParentCategoryListAPIView(generics.ListAPIView):
         # Return only parent categories.
         return Category.objects.filter(parent__isnull=True)
 
-
+from pathlib import Path
 class LoadParentCategories(APIView):
     """
     POST to this endpoint will load the parent_categories.json fixture into the database.
     """
 
     def post(self, request):
-        CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-        PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../../"))
-        PARENT_CATEGORY_FIXTURES_FILE = os.path.join(PROJECT_ROOT, "fixtures", "category_fixtures", "parent_categories.json")
-        # Use Django's loaddata management command
-        call_command('loaddata', PARENT_CATEGORY_FIXTURES_FILE)
-        return Response(
-            {'detail': 'Parent categories loaded.'},
-            status=status.HTTP_200_OK
-        )
+        project_root = Path(settings.BASE_DIR).parent
+        fixture_path = project_root / 'fixtures' / 'category_fixtures' / 'parent_categories.json'
+        if not fixture_path.exists():
+            return Response(
+                {'detail': f'Fixture file not found at {fixture_path}'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        call_command('loaddata', str(fixture_path))
+        return Response({'detail': 'Parent categories loaded.'}, status=status.HTTP_200_OK)
 
 
 class LoadChildCategories(APIView):
@@ -325,15 +324,15 @@ class LoadChildCategories(APIView):
     """
 
     def post(self, request):
-        CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-        PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../../"))
-        CHILD_CATEGORY_FIXTURES_FILE = os.path.join(PROJECT_ROOT, "fixtures", "category_fixtures", "child_categories.json")
-
-        call_command('loaddata', CHILD_CATEGORY_FIXTURES_FILE)
-        return Response(
-            {'detail': 'Child categories loaded.'},
-            status=status.HTTP_200_OK
-        )
+        project_root = Path(settings.BASE_DIR).parent
+        fixture_path = project_root / 'fixtures' / 'category_fixtures' / 'child_categories.json'
+        if not fixture_path.exists():
+            return Response(
+                {'detail': f'Fixture file not found at {fixture_path}'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        call_command('loaddata', str(fixture_path))
+        return Response({'detail': 'Child categories loaded.'}, status=status.HTTP_200_OK)
 
 
 class RebuildCategories(APIView):
