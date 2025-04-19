@@ -295,7 +295,6 @@ class ParentCategoryListAPIView(generics.ListAPIView):
 
 
 from django.conf import settings
-from django.core.management import call_command
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -305,24 +304,6 @@ import json
 import time
 import requests
 import cloudinary.uploader
-
-
-class LoadProductsFixtures(APIView):
-    """
-    POST to this endpoint will load the product_fixtures.json fixture into the database.
-    """
-
-    def post(self, request):
-        project_root = Path(settings.BASE_DIR).parent
-        fixture_path = project_root / 'fixtures' / 'product_fixtures' / 'product_fixtures.json'
-        if not fixture_path.exists():
-            return Response(
-                {'detail': f'Fixture file not found at {fixture_path}'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        call_command('loaddata', str(fixture_path))
-        return Response({'detail': 'Products fixtures loaded.'}, status=status.HTTP_200_OK)
-
 
 class CreateProductMedia(APIView):
     """
