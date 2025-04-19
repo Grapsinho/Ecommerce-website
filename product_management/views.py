@@ -295,7 +295,6 @@ class ParentCategoryListAPIView(generics.ListAPIView):
 
 
 from django.conf import settings
-from django.core.management import call_command
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -305,23 +304,36 @@ import json
 import time
 import requests
 import cloudinary.uploader
+from django.core.serializers.base import DeserializationError
+from django.core import serializers
 
 
 class LoadProductsFixtures(APIView):
     """
     POST to this endpoint will load the product_fixtures.json fixture into the database.
+
+    Uses Django's serializers to manually deserialize, avoiding loaddata errors.
     """
 
     def post(self, request):
         project_root = Path(settings.BASE_DIR).parent
         fixture_path = project_root / 'fixtures' / 'product_fixtures' / 'product_fixtures.json'
         if not fixture_path.exists():
-            return Response(
-                {'detail': f'Fixture file not found at {fixture_path}'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        call_command('loaddata', str(fixture_path))
-        return Response({'detail': 'Products fixtures loaded.'}, status=status.HTTP_200_OK)
+            return Response({'detail': f'Fixture file not found at {fixture_path}'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            with open(fixture_path, 'r', encoding='utf-8') as f:
+                raw = f.read()
+            count = 0
+            for obj in serializers.deserialize('json', raw):
+                obj.save()
+                count += 1
+        except DeserializationError as e:
+            return Response({'detail': f'Error deserializing fixtures: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({'detail': f'Unexpected error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({'detail': f'Loaded {count} product objects.'}, status=status.HTTP_200_OK)
 
 
 class CreateProductMedia(APIView):
