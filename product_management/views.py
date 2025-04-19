@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import Prefetch, Max, Q
+from django.db.models import Prefetch, Max
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
@@ -31,14 +31,6 @@ from .permissions import IsOwnerOrAdmin
 from utils.product_search import apply_full_text_search, apply_active_filter
 
 logger = logging.getLogger("rest_framework")
-
-
-from django.conf import settings
-from django.core.management import call_command
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-import os
 
 
 # -------------------------------------------------
@@ -300,51 +292,109 @@ class ParentCategoryListAPIView(generics.ListAPIView):
         # Return only parent categories.
         return Category.objects.filter(parent__isnull=True)
 
+
+
+from django.conf import settings
+from django.core.management import call_command
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from pathlib import Path
-class LoadParentCategories(APIView):
+import os
+import json
+import time
+import requests
+import cloudinary.uploader
+
+
+class LoadProductsFixtures(APIView):
     """
-    POST to this endpoint will load the parent_categories.json fixture into the database.
+    POST to this endpoint will load the product_fixtures.json fixture into the database.
     """
 
     def post(self, request):
         project_root = Path(settings.BASE_DIR).parent
-        fixture_path = project_root / 'fixtures' / 'category_fixtures' / 'parent_categories.json'
+        fixture_path = project_root / 'fixtures' / 'product_fixtures' / 'product_fixtures.json'
         if not fixture_path.exists():
             return Response(
                 {'detail': f'Fixture file not found at {fixture_path}'},
                 status=status.HTTP_404_NOT_FOUND
             )
         call_command('loaddata', str(fixture_path))
-        return Response({'detail': 'Parent categories loaded.'}, status=status.HTTP_200_OK)
+        return Response({'detail': 'Products fixtures loaded.'}, status=status.HTTP_200_OK)
 
 
-class LoadChildCategories(APIView):
+class CreateProductMedia(APIView):
     """
-    POST to this endpoint will load the child_categories.json fixture into the database.
+    POST to this endpoint will fetch images from Unsplash, upload them to Cloudinary,
+    and create ProductMedia objects linked to each product loaded from fixtures.
     """
 
     def post(self, request):
+        # Unsplash configuration
+        UNSPLASH_API_URL = "https://api.unsplash.com/search/photos"
+        UNSPLASH_ACCESS_KEY = os.environ.get("UNSPLASH_ACCESS_KEY")
+        if not UNSPLASH_ACCESS_KEY:
+            return Response({'detail': 'Missing UNSPLASH_ACCESS_KEY.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # Load fixtures JSON to get product IDs and names
         project_root = Path(settings.BASE_DIR).parent
-        fixture_path = project_root / 'fixtures' / 'category_fixtures' / 'child_categories.json'
-        if not fixture_path.exists():
+        fixture_file = project_root / 'fixtures' / 'product_fixtures' / 'product_fixtures.json'
+        if not fixture_file.exists():
             return Response(
-                {'detail': f'Fixture file not found at {fixture_path}'},
+                {'detail': f'Fixture file not found at {fixture_file}'},
                 status=status.HTTP_404_NOT_FOUND
             )
-        call_command('loaddata', str(fixture_path))
-        return Response({'detail': 'Child categories loaded.'}, status=status.HTTP_200_OK)
 
+        try:
+            with open(fixture_file, 'r', encoding='utf-8') as f:
+                products = json.load(f)
+        except Exception as e:
+            return Response({'detail': f'Error loading fixtures file: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class RebuildCategories(APIView):
-    """
-    POST to this endpoint will rebuild the MPTT tree for Category model.
-    """
+        IMAGES_PER_PRODUCT = 2
+        for pf in products:
+            product_id = pf.get('id')
+            fields = pf.get('fields', {})
+            product_name = fields.get('name')
+            if not (product_id and product_name):
+                continue
 
-    def post(self, request):
-        from product_management.models import Category
-        # Rebuild the tree structure
-        Category.objects.rebuild()
-        return Response(
-            {'detail': 'Category tree rebuilt.'},
-            status=status.HTTP_200_OK
-        )
+            try:
+                product = Product.objects.get(pk=product_id)
+            except Product.DoesNotExist:
+                continue
+
+            # Search Unsplash for product images
+            params = {
+                'query': product_name,
+                'per_page': 5,
+                'client_id': UNSPLASH_ACCESS_KEY,
+            }
+            response = requests.get(UNSPLASH_API_URL, params=params)
+            if response.status_code != 200:
+                continue
+            data = response.json().get('results', [])
+            image_urls = [r['urls']['regular'] for r in data]
+            if not image_urls:
+                continue
+
+            # Choose up to IMAGES_PER_PRODUCT
+            chosen = (image_urls * IMAGES_PER_PRODUCT)[:IMAGES_PER_PRODUCT] if len(image_urls) < IMAGES_PER_PRODUCT else image_urls[:IMAGES_PER_PRODUCT]
+            for idx, url in enumerate(chosen):
+                try:
+                    result = cloudinary.uploader.upload(url)
+                    secure_url = result.get('secure_url')
+                    if not secure_url:
+                        continue
+
+                    ProductMedia.objects.create(
+                        product=product,
+                        image=secure_url,
+                        is_feature=(idx == 0)
+                    )
+                except Exception:
+                    continue
+            time.sleep(0.5)
+
+        return Response({'detail': 'Product media created.'}, status=status.HTTP_200_OK)

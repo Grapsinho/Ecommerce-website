@@ -487,29 +487,3 @@ class RefreshAccessTokenView(APIView):
         # Update cookies with new tokens
         set_jwt_token.set_secure_jwt_cookie(response, new_access_token, new_refresh_token)
         return response
-
-
-
-
-
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
- 
-@csrf_exempt  # Optional: disable CSRF for quick access, but only if it's safe
-def create_superuser_view(request):
-
-    # Prevent accidental duplicate creation
-    if User.objects.filter(is_superuser=True).exists():
-        return JsonResponse({"message": "Superuser already exists."}, status=400)
-
-    # Customize the credentials here
-    User.objects.create_superuser(
-        username="admin",
-        email="giguuag@gmail.com",
-        password="giorgi123",
-        age=21,
-        phone_number="+995598351432",
-        full_username="admin_vaa",
-        city="Gori"
-    )
-    return JsonResponse({"message": "Superuser created successfully."})

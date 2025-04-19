@@ -8,8 +8,7 @@ from .views import (
     PasswordResetConfirmView,
     PasswordResetRequestView,
     RefreshAccessTokenView,
-    CurrentUserProfileView,
-    create_superuser_view
+    CurrentUserProfileView
 )
 
 urlpatterns = [
@@ -26,6 +25,4 @@ urlpatterns = [
 
     path("profile/<uuid:user_id>/", UserProfileView.as_view(), name="user-profile"),
     path("profile/current/", CurrentUserProfileView.as_view(), name="current-user-profile"),
-
-    path("create-superuser/", create_superuser_view, name="create-superuser"),
 ]
