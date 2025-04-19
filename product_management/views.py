@@ -306,7 +306,6 @@ class LoadParentCategories(APIView):
     """
     POST to this endpoint will load the parent_categories.json fixture into the database.
     """
-    permission_classes = [IsAdminUser]
 
     def post(self, request):
         CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -324,13 +323,12 @@ class LoadChildCategories(APIView):
     """
     POST to this endpoint will load the child_categories.json fixture into the database.
     """
-    permission_classes = [IsAdminUser]
 
     def post(self, request):
         CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
         PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../../"))
         CHILD_CATEGORY_FIXTURES_FILE = os.path.join(PROJECT_ROOT, "fixtures", "category_fixtures", "child_categories.json")
-        
+
         call_command('loaddata', CHILD_CATEGORY_FIXTURES_FILE)
         return Response(
             {'detail': 'Child categories loaded.'},
@@ -342,7 +340,6 @@ class RebuildCategories(APIView):
     """
     POST to this endpoint will rebuild the MPTT tree for Category model.
     """
-    permission_classes = [IsAdminUser]
 
     def post(self, request):
         from product_management.models import Category
