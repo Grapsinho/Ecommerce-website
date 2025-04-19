@@ -19,6 +19,9 @@ urlpatterns = [
     # wishlist
     path('wishlist/', include('wishlist_app.urls')),
 
+    # cart
+    path('cart/', include('product_cart.urls')),
+
     # YOUR PATTERNS
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:

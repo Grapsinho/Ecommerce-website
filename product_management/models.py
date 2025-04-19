@@ -4,6 +4,7 @@ from mptt.models import MPTTModel, TreeForeignKey
 from utils.slug_utils import unique_slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import Q
+from decimal import Decimal
 
 from cloudinary_storage.storage import MediaCloudinaryStorage
 
@@ -52,7 +53,7 @@ class Product(models.Model):
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        validators=[MinValueValidator(0.1)]
+        validators=[MinValueValidator(Decimal('0.1'))]
     )
     stock = models.PositiveIntegerField(
         validators=[

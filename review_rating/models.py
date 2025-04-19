@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from users.models import User
 from product_management.models import Product
+from decimal import Decimal
 
 class Review(models.Model):
 
@@ -20,8 +21,8 @@ class Review(models.Model):
         max_digits=3,
         decimal_places=2,
         validators=[
-            MinValueValidator(0.0),
-            MaxValueValidator(5.0)
+            MinValueValidator(Decimal("0.0")),
+            MaxValueValidator(Decimal("5.0"))
         ]
     )
     created_at = models.DateTimeField(auto_now_add=True)

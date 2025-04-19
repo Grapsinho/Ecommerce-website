@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "product_management.apps.ProductManagementConfig",
     "review_rating.apps.ReviewRatingConfig",
     "wishlist_app.apps.WishlistAppConfig",
+    "product_cart.apps.ProductCartConfig",
 
     # external app
     "mptt",
