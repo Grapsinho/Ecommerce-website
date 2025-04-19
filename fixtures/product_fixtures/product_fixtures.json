@@ -1,6 +1,454 @@
 [
   {
     "model": "product_management.product",
+    "pk": 1,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "iPhone 14 Pro",
+      "description": "The latest Apple flagship featuring an advanced triple-camera system and A16 Bionic chip for exceptional performance.",
+      "slug": "iphone-14-pro",
+      "price": "999.99",
+      "stock": 150,
+      "condition": "new",
+      "category": 21,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 2,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "Dell XPS 15",
+      "description": "A high-performance laptop offering a near bezel-less display, robust build quality, and powerful internals to boost productivity.",
+      "slug": "dell-xps-15",
+      "price": "1399.99",
+      "stock": 75,
+      "condition": "new",
+      "category": 22,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 3,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "Canon EOS R6",
+      "description": "A professional mirrorless camera featuring high-speed autofocus, superb image quality, and advanced video capabilities.",
+      "slug": "canon-eos-r6",
+      "price": "2499.99",
+      "stock": 40,
+      "condition": "new",
+      "category": 23,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 4,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "Sony Noise Cancelling Headphones",
+      "description": "Experience immersive sound with industry-leading noise cancellation technology and premium comfort design.",
+      "slug": "sony-noise-cancelling-headphones",
+      "price": "349.99",
+      "stock": 120,
+      "condition": "new",
+      "category": 24,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 5,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "Men's Classic Leather Jacket",
+      "description": "Premium quality leather jacket combining timeless style with durability, perfect for any wardrobe.",
+      "slug": "mens-classic-leather-jacket",
+      "price": "299.99",
+      "stock": 80,
+      "condition": "new",
+      "category": 25,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 6,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "Elegant Women's Silk Scarf",
+      "description": "A luxurious silk scarf featuring vibrant patterns and crafted with attention to detail for a refined look.",
+      "slug": "elegant-womens-silk-scarf",
+      "price": "89.99",
+      "stock": 200,
+      "condition": "new",
+      "category": 26,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 7,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "Kids' Educational Tablet",
+      "description": "A robust and interactive tablet designed for children, offering educational apps and durable build quality.",
+      "slug": "kids-educational-tablet",
+      "price": "149.99",
+      "stock": 180,
+      "condition": "new",
+      "category": 27,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 8,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "Fitbit Versa 3 Smartwatch",
+      "description": "A versatile smartwatch that offers comprehensive fitness tracking, heart rate monitoring, and built-in GPS.",
+      "slug": "fitbit-versa-3-smartwatch",
+      "price": "229.99",
+      "stock": 130,
+      "condition": "new",
+      "category": 28,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 9,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "Breville Espresso Machine",
+      "description": "Engineered for consistent, cafe-quality espresso, this machine is a must-have for coffee aficionados.",
+      "slug": "breville-espresso-machine",
+      "price": "799.99",
+      "stock": 60,
+      "condition": "new",
+      "category": 29,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 10,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "Le Creuset Dutch Oven",
+      "description": "An iconic enameled cast iron pot, ideal for slow-cooking, braising and creating rich, savory stews.",
+      "slug": "le-creuset-dutch-oven",
+      "price": "349.99",
+      "stock": 90,
+      "condition": "new",
+      "category": 30,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 11,
+    "fields": {
+      "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
+      "name": "Modern Sofa Collection",
+      "description": "A contemporary sofa set that blends comfort with clean, modern design for upscale living spaces.",
+      "slug": "modern-sofa-collection",
+      "price": "1599.99",
+      "stock": 30,
+      "condition": "new",
+      "category": 31,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 12,
+    "fields": {
+      "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
+      "name": "Luxury Bedding Set",
+      "description": "A premium bedding ensemble crafted from high thread count cotton for a sumptuous sleep experience.",
+      "slug": "luxury-bedding-set",
+      "price": "499.99",
+      "stock": 55,
+      "condition": "new",
+      "category": 32,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 13,
+    "fields": {
+      "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
+      "name": "Nordic Treadmill Pro",
+      "description": "A state-of-the-art treadmill designed for intense home workouts and endurance training.",
+      "slug": "nordic-treadmill-pro",
+      "price": "1899.99",
+      "stock": 20,
+      "condition": "new",
+      "category": 33,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 14,
+    "fields": {
+      "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
+      "name": "Camping Tent for 4",
+      "description": "A spacious, durable four-person tent designed for family adventures and reliable performance in the outdoors.",
+      "slug": "camping-tent-for-4",
+      "price": "299.99",
+      "stock": 70,
+      "condition": "new",
+      "category": 34,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 15,
+    "fields": {
+      "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
+      "name": "Specialized Road Bike",
+      "description": "A high-performance road bike engineered for competitive cyclists, featuring lightweight materials and precision engineering.",
+      "slug": "specialized-road-bike",
+      "price": "2499.99",
+      "stock": 15,
+      "condition": "new",
+      "category": 35,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 16,
+    "fields": {
+      "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
+      "name": "Samsung Galaxy S23",
+      "description": "The latest flagship smartphone by Samsung featuring an advanced camera system and an immersive AMOLED display.",
+      "slug": "samsung-galaxy-s23",
+      "price": "799.99",
+      "stock": 200,
+      "condition": "new",
+      "category": 21,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 17,
+    "fields": {
+      "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
+      "name": "HP Spectre x360 14",
+      "description": "A premium convertible laptop with a 360-degree hinge, delivering top-notch performance and stunning design.",
+      "slug": "hp-spectre-x360-14",
+      "price": "1599.99",
+      "stock": 85,
+      "condition": "new",
+      "category": 22,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 18,
+    "fields": {
+      "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
+      "name": "Nikon Z7 II Mirrorless",
+      "description": "A top-tier mirrorless camera featuring a high-resolution sensor, advanced autofocus, and excellent low-light performance.",
+      "slug": "nikon-z7-ii-mirrorless",
+      "price": "2799.99",
+      "stock": 45,
+      "condition": "new",
+      "category": 23,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 19,
+    "fields": {
+      "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
+      "name": "Fossil Gen 6 Smartwatch",
+      "description": "A smart wearable that blends classic design with modern functionality to monitor your health and stay connected.",
+      "slug": "fossil-gen-6-smartwatch",
+      "price": "299.99",
+      "stock": 140,
+      "condition": "new",
+      "category": 28,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 20,
+    "fields": {
+      "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
+      "name": "Levi's Men's Denim Jacket",
+      "description": "A rugged yet stylish denim jacket crafted from premium materials, ideal for a timeless urban look.",
+      "slug": "levis-mens-denim-jacket",
+      "price": "129.99",
+      "stock": 110,
+      "condition": "new",
+      "category": 25,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 21,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "Calvin Klein Women's Summer Dress",
+      "description": "An elegant summer dress that combines sleek style with breathable comfort for a chic look.",
+      "slug": "calvin-klein-womens-summer-dress",
+      "price": "199.99",
+      "stock": 95,
+      "condition": "new",
+      "category": 26,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 22,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "Lego Star Wars Millennium Falcon",
+      "description": "A detailed LEGO set recreating the iconic Millennium Falcon with authentic design elements for fans and collectors.",
+      "slug": "lego-star-wars-millennium-falcon",
+      "price": "349.99",
+      "stock": 65,
+      "condition": "new",
+      "category": 52,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 23,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "Ravensburger 1000-Piece Puzzle",
+      "description": "Challenge your mind with a beautifully illustrated 1000-piece puzzle designed to offer hours of entertainment.",
+      "slug": "ravensburger-1000-piece-puzzle",
+      "price": "29.99",
+      "stock": 250,
+      "condition": "new",
+      "category": 55,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 24,
+    "fields": {
+      "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
+      "name": "Bose QuietComfort Earbuds",
+      "description": "Wireless earbuds offering exceptional sound quality and active noise cancellation for a premium audio experience.",
+      "slug": "bose-quietcomfort-earbuds",
+      "price": "279.99",
+      "stock": 130,
+      "condition": "new",
+      "category": 24,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 25,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "KitchenAid Stand Mixer",
+      "description": "A kitchen essential, this stand mixer blends power and versatility to help you create bakery-quality treats at home.",
+      "slug": "kitchenaid-stand-mixer",
+      "price": "499.99",
+      "stock": 55,
+      "condition": "new",
+      "category": 29,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 26,
+    "fields": {
+      "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
+      "name": "Ikea Malm Bed Frame",
+      "description": "A modern bed frame by Ikea, offering clean lines and durable design that fits seamlessly into any contemporary bedroom.",
+      "slug": "ikea-malm-bed-frame",
+      "price": "249.99",
+      "stock": 40,
+      "condition": "new",
+      "category": 93,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 27,
+    "fields": {
+      "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
+      "name": "Adidas Ultraboost Running Shoes",
+      "description": "High-performance running shoes engineered for comfort and speed with exceptional energy return in every step.",
+      "slug": "adidas-ultraboost-running-shoes",
+      "price": "179.99",
+      "stock": 75,
+      "condition": "new",
+      "category": 89,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 28,
+    "fields": {
+      "seller": "aa09bfe2-7d57-4cb0-9daf-01452e32732b",
+      "name": "Sony PlayStation 5",
+      "description": "The next-generation gaming console delivering immersive gameplay with lightning-fast loading and ray tracing technology.",
+      "slug": "sony-playstation-5",
+      "price": "499.99",
+      "stock": 60,
+      "condition": "new",
+      "category": 85,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
     "pk": 29,
     "fields": {
       "seller": "8424fda2-006a-4feb-8546-6ad2a2bc666d",
