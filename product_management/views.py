@@ -293,6 +293,18 @@ class ParentCategoryListAPIView(generics.ListAPIView):
         return Category.objects.filter(parent__isnull=True)
 
 
+class ProductListAPIViewRame(generics.ListAPIView):
+    """
+    API endpoint to retrieve parent categories without nested children.
+    This is optimized for cases where child data is not needed.
+    """
+    serializer_class = ProductRetrieveSerializer
+    pagination_class = [ProductPagination]
+
+    def get_queryset(self):
+        # Return only parent categories.
+        return Product.objects.all()
+
 
 from django.conf import settings
 from rest_framework.views import APIView
@@ -306,76 +318,93 @@ import requests
 import cloudinary.uploader
 
 class CreateProductMedia(APIView):
-    """
-    POST to this endpoint will fetch images from Unsplash, upload them to Cloudinary,
-    and create ProductMedia objects linked to each product loaded from fixtures.
-    """
 
     def post(self, request):
-        # Unsplash configuration
+        # Stats and messages
+        total_products = 0
+        media_created = 0
+        unsplash_errors = 0
+        no_results = 0
+        cloudinary_errors = 0
+        messages = []
+
         UNSPLASH_API_URL = "https://api.unsplash.com/search/photos"
         UNSPLASH_ACCESS_KEY = os.environ.get("UNSPLASH_ACCESS_KEY")
         if not UNSPLASH_ACCESS_KEY:
             return Response({'detail': 'Missing UNSPLASH_ACCESS_KEY.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # Load fixtures JSON to get product IDs and names
         project_root = Path(settings.BASE_DIR).parent
-        fixture_file = project_root / 'fixtures' / 'product_fixtures' / 'product_fixtures.json'
-        if not fixture_file.exists():
-            return Response(
-                {'detail': f'Fixture file not found at {fixture_file}'},
-                status=status.HTTP_404_NOT_FOUND
-            )
+        fixture_path = project_root / 'fixtures' / 'product_fixtures' / 'product_fixtures.json'
+        if not fixture_path.exists():
+            return Response({'detail': f'Fixture file not found at {fixture_path}'}, status=status.HTTP_404_NOT_FOUND)
 
         try:
-            with open(fixture_file, 'r', encoding='utf-8') as f:
+            with open(fixture_path, 'r', encoding='utf-8') as f:
                 products = json.load(f)
         except Exception as e:
+            logger.exception("Failed to load product fixtures JSON")
             return Response({'detail': f'Error loading fixtures file: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         IMAGES_PER_PRODUCT = 2
+        total_products = len(products)
+
         for pf in products:
-            product_id = pf.get('id')
-            fields = pf.get('fields', {})
-            product_name = fields.get('name')
-            if not (product_id and product_name):
+            pid = pf.get('pk') or pf.get('id')
+            name = pf.get('fields', {}).get('name')
+            if not (pid and name):
+                messages.append(f"Skipping entry without pk/name: {pf}")
                 continue
 
             try:
-                product = Product.objects.get(pk=product_id)
+                product = Product.objects.get(pk=pid)
             except Product.DoesNotExist:
+                messages.append(f"Product with pk {pid} not found")
                 continue
 
-            # Search Unsplash for product images
-            params = {
-                'query': product_name,
-                'per_page': 5,
-                'client_id': UNSPLASH_ACCESS_KEY,
-            }
-            response = requests.get(UNSPLASH_API_URL, params=params)
-            if response.status_code != 200:
-                continue
-            data = response.json().get('results', [])
-            image_urls = [r['urls']['regular'] for r in data]
-            if not image_urls:
+            # Unsplash search
+            params = {'query': name, 'per_page': 5, 'client_id': UNSPLASH_ACCESS_KEY}
+            resp = requests.get(UNSPLASH_API_URL, params=params)
+            if resp.status_code != 200:
+                unsplash_errors += 1
+                messages.append(f"Unsplash API error for product {pid}: status {resp.status_code}")
                 continue
 
-            # Choose up to IMAGES_PER_PRODUCT
-            chosen = (image_urls * IMAGES_PER_PRODUCT)[:IMAGES_PER_PRODUCT] if len(image_urls) < IMAGES_PER_PRODUCT else image_urls[:IMAGES_PER_PRODUCT]
+            results = resp.json().get('results', [])
+            if not results:
+                no_results += 1
+                messages.append(f"No Unsplash results for product {pid} ({name})")
+                continue
+
+            # Choose images
+            urls = [r['urls']['regular'] for r in results]
+            chosen = (urls * IMAGES_PER_PRODUCT)[:IMAGES_PER_PRODUCT]
+
             for idx, url in enumerate(chosen):
                 try:
-                    result = cloudinary.uploader.upload(url)
-                    secure_url = result.get('secure_url')
-                    if not secure_url:
+                    res = cloudinary.uploader.upload(url)
+                    sec = res.get('secure_url')
+                    if not sec:
+                        cloudinary_errors += 1
+                        messages.append(f"Cloudinary upload returned no URL for product {pid}")
                         continue
+                    ProductMedia.objects.create(product=product, image=sec, is_feature=(idx == 0))
+                    media_created += 1
+                except Exception as e:
+                    cloudinary_errors += 1
+                    logger.exception(f"Cloudinary upload failed for product {pid}, url {url}")
+                    messages.append(f"Cloudinary exception for product {pid}: {str(e)}")
 
-                    ProductMedia.objects.create(
-                        product=product,
-                        image=secure_url,
-                        is_feature=(idx == 0)
-                    )
-                except Exception:
-                    continue
             time.sleep(0.5)
 
-        return Response({'detail': 'Product media created.'}, status=status.HTTP_200_OK)
+        summary = {
+            'total_products': total_products,
+            'media_created': media_created,
+            'unsplash_errors': unsplash_errors,
+            'no_results': no_results,
+            'cloudinary_errors': cloudinary_errors
+        }
+        return Response({
+            'detail': 'Product media run completed.',
+            'summary': summary,
+            'messages': messages
+        }, status=status.HTTP_200_OK)
