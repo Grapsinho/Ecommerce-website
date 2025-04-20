@@ -2,11 +2,9 @@ from django.urls import path, include
 from rest_framework import routers
 from .views import MessageViewSet, ChatViewSet
 
-
 router = routers.DefaultRouter()
 router.register(r'chats', ChatViewSet, basename='chat')
 
-# Nested routing for messages under chats
 message_list = MessageViewSet.as_view({
     'get': 'list',
     'post': 'create'

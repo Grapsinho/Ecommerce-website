@@ -25,6 +25,9 @@ urlpatterns = [
     # chat
     path('chat/', include('chat_app.urls')),
 
+    # notifications
+    path('', include('notification_app.urls')),
+
     # YOUR PATTERNS
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:

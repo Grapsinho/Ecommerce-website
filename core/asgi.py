@@ -13,16 +13,16 @@ else:
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings.production')
 
 
+django_asgi_app = get_asgi_application()
+
 from chat_app.routing import websocket_urlpatterns
+from notification_app.routing import websocket_urlpatterns as notification_patterns
 
 application = ProtocolTypeRouter({
-    # HTTP -> Django
-    "http": get_asgi_application(),
-
-    # WebSocket -> Auth stack -> your chat URLRouter
+    "http": django_asgi_app,
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            websocket_urlpatterns
+            websocket_urlpatterns + notification_patterns
         )
     ),
 })

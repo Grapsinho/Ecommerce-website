@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-
+import uuid
 from product_management.models import Product
 
 User = settings.AUTH_USER_MODEL
@@ -11,6 +11,9 @@ class Chat(models.Model):
     One persistent chat between a buyer and product owner.
     The 'product' field is updated if buyer starts chatting about a new product.
     """
+
+    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+
     buyer = models.ForeignKey(
         User, related_name='chats_as_buyer', on_delete=models.CASCADE
     )
@@ -31,15 +34,23 @@ class Chat(models.Model):
             models.Index(fields=['buyer', 'owner']),
             models.Index(fields=['updated_at']),
         ]
+    
+
+    def get_other_user(self, user):
+        return self.owner if self.buyer == user else self.buyer
+
 
     def __str__(self):
-        return f"Chat {self.pk} between {self.buyer} and {self.owner}"
+        return f"Chat {self.id} between {self.buyer} and {self.owner}"
 
 
 class Message(models.Model):
     """
     A chat message. 'is_read' toggles when recipient fetches messages.
     """
+
+    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+
     chat = models.ForeignKey(
         Chat, related_name='messages', on_delete=models.CASCADE
     )
@@ -58,4 +69,4 @@ class Message(models.Model):
         ]
 
     def __str__(self):
-        return f"Message {self.pk} in Chat {self.chat.pk}"
+        return f"Message {self.id} in Chat {self.chat.id}"

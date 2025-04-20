@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "wishlist_app.apps.WishlistAppConfig",
     "product_cart.apps.ProductCartConfig",
     "chat_app.apps.ChatAppConfig",
+    "notification_app.apps.NotificationAppConfig",
 
     # external app
     "mptt",
@@ -149,6 +150,8 @@ SPECTACULAR_SETTINGS = {
 
 redis_url = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1")
 
+redis_url_websocket = os.environ.get("REDIS_URL_WEBSOCKET", "redis://127.0.0.1:6379/1")
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
@@ -166,7 +169,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [redis_url],
+            "hosts": [redis_url_websocket],
         },
     },
 }

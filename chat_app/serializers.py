@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from django.db import IntegrityError, transaction
+from django.db import transaction, IntegrityError
 from django.contrib.auth import get_user_model
 from product_management.models import Product
 from .models import Chat, Message
@@ -31,20 +31,21 @@ class ChatCreateSerializer(serializers.ModelSerializer):
         product = validated_data['product_slug']
         owner = product.seller
 
+        # Fast path: avoid transaction if chat exists
+        chat = Chat.objects.filter(buyer=buyer, owner=owner).first()
+        if chat:
+            if chat.product_id != product.id:
+                chat.product = product
+                chat.save(update_fields=['product', 'updated_at'])
+            return chat
+
+        # Slow path: create new chat
         try:
             with transaction.atomic():
-                chat, created = Chat.objects.get_or_create(
-                    buyer=buyer,
-                    owner=owner,
-                    defaults={'product': product}
-                )
-                if not created and chat.product != product:
-                    chat.product = product
-                    chat.save(update_fields=['product', 'updated_at'])
+                return Chat.objects.create(buyer=buyer, owner=owner, product=product)
         except IntegrityError:
-            # possible race: fetch existing chat
-            chat = Chat.objects.get(buyer=buyer, owner=owner)
-        return chat
+            # someone else just created it
+            return Chat.objects.get(buyer=buyer, owner=owner)
 
 
 class ProductPreviewSerializer(serializers.Serializer):
