@@ -280,6 +280,7 @@
 
       // --- render a message ---
       function addMessageItem(m) {
+        console.log(m);
         const ul = document.getElementById("message-list");
         const li = document.createElement("li");
         const time = new Date(m.timestamp).toLocaleTimeString();
@@ -328,6 +329,7 @@
         chatSocket.onopen = () => log("chat-log", "🟢 Chat WS connected");
         chatSocket.onmessage = (ev) => {
           const msg = JSON.parse(ev.data);
+          console.log(msg);
           if (msg.type === "message.new") {
             addMessageItem({
               id: msg.message.id,
@@ -397,7 +399,9 @@
       document.getElementById("btn-list-chats").onclick = listChats;
       document.getElementById("btn-load-more").onclick = loadMore;
       document.getElementById("btn-send-message").onclick = sendMessage;
-      document.getElementById("msg-delete-button").onclick = deleteMessage;
+      if (document.getElementById("msg-delete-button")) {
+        document.getElementById("msg-delete-button").onclick = deleteMessage;
+      }
     </script>
   </body>
 </html>

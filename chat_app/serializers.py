@@ -30,8 +30,6 @@ class ChatCreateSerializer(serializers.ModelSerializer):
         buyer = self.context['request'].user
         product = validated_data['product_slug']
         owner = product.seller
-
-        # Use get_or_create to avoid race conditions
         with transaction.atomic():
             chat, created = Chat.objects.get_or_create(
                 buyer=buyer,
@@ -42,6 +40,7 @@ class ChatCreateSerializer(serializers.ModelSerializer):
                 chat.product = product
                 chat.save(update_fields=['product', 'updated_at'])
         return chat
+
 
 class ProductPreviewSerializer(serializers.Serializer):
     slug = serializers.SlugField(read_only=True)
@@ -54,15 +53,14 @@ class ProductPreviewSerializer(serializers.Serializer):
         featured = getattr(product, 'feature_media', [])
         if not featured:
             return None
-
         return featured[0].image.url
+
 
 class ChatListSerializer(serializers.ModelSerializer):
     other_user = serializers.SerializerMethodField()
     product = ProductPreviewSerializer(read_only=True)
-    unread_count = serializers.IntegerField(source='unread', read_only=True)
+    unread_count = serializers.IntegerField(read_only=True)
     last_message = serializers.SerializerMethodField()
-
 
     class Meta:
         model = Chat
@@ -71,8 +69,8 @@ class ChatListSerializer(serializers.ModelSerializer):
     def get_other_user(self, obj):
         user = self.context['request'].user
         other = obj.owner if obj.buyer == user else obj.buyer
-        request = self.context.get('request')
         avatar_url = other.avatar.url
+        request = self.context.get('request')
         if request:
             avatar_url = request.build_absolute_uri(avatar_url)
         return {
@@ -81,13 +79,14 @@ class ChatListSerializer(serializers.ModelSerializer):
             'avatar': avatar_url,
             'city': other.city,
         }
-    
+
     def get_last_message(self, obj):
         text = getattr(obj, 'last_message_text', None)
         ts = getattr(obj, 'last_message_timestamp', None)
         if text is None or ts is None:
             return None
         return {'text': text, 'timestamp': ts}
+
 
 class MessageSerializer(serializers.ModelSerializer):
     sender_id = serializers.UUIDField(source='sender.id', read_only=True)

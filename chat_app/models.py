@@ -35,6 +35,11 @@ class Chat(models.Model):
         help_text="Denormalized pointer to the last Message in this chat"
     )
 
+    unread_count = models.PositiveIntegerField(
+        default=0,
+        help_text="Denormalized count of unread messages for the other participant"
+    )
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['buyer', 'owner'], name='unique_owner_buyer')
@@ -85,8 +90,9 @@ class Message(models.Model):
         super().save(*args, **kwargs)
         if is_new:
             Chat.objects.filter(pk=self.chat_id).update(
-                updated_at=F('timestamp'),
-                last_message_id=self.id
+                updated_at=self.timestamp,
+                last_message_id=self.id,
+                unread_count=F('unread_count') + 1
             )
 
     def __str__(self):

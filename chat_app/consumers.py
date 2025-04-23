@@ -64,8 +64,8 @@ class ChatConsumer(JWTAuthMixin, AsyncJsonWebsocketConsumer):
         # 1) Save the message
         try:
             message = await self.create_message(text)
-        except Exception:
-            return await self.send_json({'type': 'error', 'detail': 'Could not save message.'})
+        except Exception as e:
+            return await self.send_json({'type': 'error', 'detail': f'Could not save message. {e}'})
 
         payload = {
             'id': str(message.id),
