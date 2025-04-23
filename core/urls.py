@@ -23,7 +23,7 @@ urlpatterns = [
     path('cart/', include('product_cart.urls')),
 
     # chat
-    path('chat/', include('chat_app.urls')),
+    path('', include('chat_app.urls')),
 
     # notifications
     path('', include('notification_app.urls')),

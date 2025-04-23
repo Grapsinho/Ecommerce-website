@@ -26,6 +26,17 @@ class Chat(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
+    last_message = models.ForeignKey(
+        'Message',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+',   # no reverse relation
+        help_text="Denormalized pointer to the last Message in this chat"
+    )
+
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['buyer', 'owner'], name='unique_owner_buyer')
@@ -33,6 +44,7 @@ class Chat(models.Model):
         indexes = [
             models.Index(fields=['buyer', 'owner']),
             models.Index(fields=['updated_at']),
+            models.Index(fields=['last_message']),
         ]
     
 
@@ -62,10 +74,16 @@ class Message(models.Model):
     is_read = models.BooleanField(default=False, db_index=True)
 
     class Meta:
-        ordering = ['-timestamp']
+        ordering = ["timestamp"]
         indexes = [
+            # existing indexes
             models.Index(fields=['chat', 'timestamp']),
             models.Index(fields=['chat', 'is_read']),
+            # covering index for unread‐count queries
+            models.Index(
+                fields=['chat', 'is_read', 'timestamp'],
+                name='msg_chat_isread_ts_idx'
+            ),
         ]
 
     def __str__(self):

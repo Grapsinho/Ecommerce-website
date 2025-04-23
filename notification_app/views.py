@@ -1,25 +1,13 @@
-# notifications/views.py
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Subquery
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
-from chat_app.models import Message
+from chat_app.models import Message, Chat
 from .serializers import NotificationSerializer
-from chat_app.pagination import MessageCursorPagination
+from .pagination import NotificationCursorPagination
 from users.authentication import JWTAuthentication
 
-from drf_spectacular.utils import extend_schema, OpenApiParameter
 
-
-@extend_schema(
-    summary="List notifications for the current user",
-    parameters=[
-        OpenApiParameter('unread_only', OpenApiParameter.QUERY, type=bool, description='Filter unread only'),
-        OpenApiParameter('before', OpenApiParameter.QUERY, type=str, description='Cursor ID to paginate before'),
-        OpenApiParameter('limit', OpenApiParameter.QUERY, type=int, description='Max items to return'),
-    ],
-    responses={200: NotificationSerializer(many=True)}
-)
 class NotificationListView(generics.ListAPIView):
     """
     GET /notifications/?unread_only=<true|false>&before=<msg_id>&limit=<n>
@@ -29,18 +17,32 @@ class NotificationListView(generics.ListAPIView):
     serializer_class = NotificationSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    pagination_class = MessageCursorPagination
+    pagination_class = NotificationCursorPagination
 
     def get_queryset(self):
         user = self.request.user
-        qs = Message.objects.filter(
-            # all chats where user is buyer or owner...
-            Q(chat__buyer=user) | Q(chat__owner=user),
-            # ...but exclude messages sent by the user
-            ~Q(sender=user)
+
+        # 1) find chats of mine
+        chats = Chat.objects.filter(Q(buyer=user) | Q(owner=user))
+
+        # 2) subquery to grab the latest unread msg‑id per chat
+        latest_unread = (
+            Message.objects
+                   .filter(chat=OuterRef('pk'), is_read=False)
+                   .exclude(sender=user)
+                   .order_by('-timestamp')
         )
-        # optional unread_only filter (default true)
-        unread_only = self.request.query_params.get('unread_only', 'true').lower()
-        if unread_only in ('true', '1'):
-            qs = qs.filter(is_read=False)
-        return qs.order_by('-timestamp')
+
+        chats = (
+            chats
+            .annotate(last_unread_msg_id=Subquery(latest_unread.values('id')[:1]))
+            .filter(last_unread_msg_id__isnull=False)
+        )
+
+        # 3) pull exactly those Messages, plus sender & chat in one query
+        return (
+            Message.objects
+                   .filter(id__in=chats.values('last_unread_msg_id'))
+                   .select_related('sender', 'chat')
+                   .order_by('-timestamp')
+        )

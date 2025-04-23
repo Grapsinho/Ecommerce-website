@@ -31,70 +31,74 @@ class ChatCreateSerializer(serializers.ModelSerializer):
         product = validated_data['product_slug']
         owner = product.seller
 
-        # Fast path: avoid transaction if chat exists
-        chat = Chat.objects.filter(buyer=buyer, owner=owner).first()
-        if chat:
-            if chat.product_id != product.id:
+        # Use get_or_create to avoid race conditions
+        with transaction.atomic():
+            chat, created = Chat.objects.get_or_create(
+                buyer=buyer,
+                owner=owner,
+                defaults={'product': product}
+            )
+            if not created and chat.product_id != product.id:
                 chat.product = product
                 chat.save(update_fields=['product', 'updated_at'])
-            return chat
-
-        # Slow path: create new chat
-        try:
-            with transaction.atomic():
-                return Chat.objects.create(buyer=buyer, owner=owner, product=product)
-        except IntegrityError:
-            # someone else just created it
-            return Chat.objects.get(buyer=buyer, owner=owner)
-
+        return chat
 
 class ProductPreviewSerializer(serializers.Serializer):
     slug = serializers.SlugField(read_only=True)
     name = serializers.CharField(read_only=True)
-    price = serializers.DecimalField(
-        max_digits=10, decimal_places=2, read_only=True
-    )
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
     condition = serializers.CharField(read_only=True)
     feature_image = serializers.SerializerMethodField()
 
     def get_feature_image(self, product):
-        request = self.context.get('request')
-        media_list = getattr(product, 'feature_media', [])
-        if not media_list:
+        featured = getattr(product, 'feature_media', [])
+        if not featured:
             return None
-        url = media_list[0].image.url
-        return request.build_absolute_uri(url) if request else url
 
+        return featured[0].image.url
 
 class ChatListSerializer(serializers.ModelSerializer):
-    with_user_full_username = serializers.SerializerMethodField()
-    product = ProductPreviewSerializer(source='product', read_only=True)
-    last_message = serializers.SerializerMethodField()
+    other_user = serializers.SerializerMethodField()
+    product = ProductPreviewSerializer(read_only=True)
     unread_count = serializers.IntegerField(source='unread', read_only=True)
+    last_message = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Chat
-        fields = [
-            'id',
-            'with_user_full_username',
-            'product',
-            'last_message',
-            'unread_count'
-        ]
+        fields = ['id', 'other_user', 'product', 'last_message', 'unread_count']
 
-    def get_with_user_full_username(self, obj):
+    def get_other_user(self, obj):
         user = self.context['request'].user
-        other = obj.get_other_user(user)
-        return other.full_username
-
-    def get_last_message(self, obj):
-        if not hasattr(obj, 'last_text') or obj.last_text is None:
+        other = obj.owner if obj.buyer == user else obj.buyer
+        request = self.context.get('request')
+        avatar_url = other.avatar.url
+        if request:
+            avatar_url = request.build_absolute_uri(avatar_url)
+        return {
+            'id': other.id,
+            'full_username': other.full_username,
+            'avatar': avatar_url,
+            'city': other.city,
+        }
+    
+    def get_last_message(self, chat):
+        """
+        Return a dict with text & timestamp of the denormalized last_message,
+        or None if there are no messages yet.
+        """
+        msg = getattr(chat, 'last_message', None)
+        if not msg:
             return None
-        return {'text': obj.last_text, 'timestamp': obj.last_ts}
-
+        return {
+            'text':      msg.text,
+            'timestamp': msg.timestamp,
+        }
 
 class MessageSerializer(serializers.ModelSerializer):
+    sender_id = serializers.UUIDField(source='sender.id', read_only=True)
+
     class Meta:
         model = Message
-        fields = ['id', 'chat', 'sender', 'text', 'timestamp']
-        read_only_fields = ['id', 'chat', 'sender', 'timestamp']
+        fields = ['id', 'chat', 'sender_id', 'text', 'timestamp']
+        read_only_fields = ['id', 'chat', 'sender_id', 'timestamp']

@@ -16,5 +16,5 @@ message_detail = MessageViewSet.as_view({
 urlpatterns = [
     path('', include(router.urls)),
     path('chats/<uuid:chat_pk>/messages/', message_list, name='chat-messages-list'),
-    path('chats/<uuid:chat_pk>/messages/<int:pk>/', message_detail, name='chat-messages-detail'),
+    path('chats/<uuid:chat_pk>/messages/<uuid:pk>/', message_detail, name='chat-messages-detail'),
 ]

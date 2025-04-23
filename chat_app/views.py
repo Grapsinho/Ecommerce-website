@@ -1,7 +1,12 @@
 from rest_framework import viewsets, mixins, permissions
 from rest_framework.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from django.db.models import Subquery, OuterRef, Count, Q, Prefetch
+from django.db.models import (
+    Prefetch, Q, OuterRef, Subquery,
+    IntegerField, Value, Count
+)
+from django.db.models.functions import Coalesce
+
 
 from .models import Chat, Message
 from .serializers import (
@@ -12,23 +17,7 @@ from .pagination import MessageCursorPagination, ChatCursorPagination
 from users.authentication import JWTAuthentication
 from product_management.models import ProductMedia
 
-from drf_spectacular.utils import (
-    extend_schema, extend_schema_view,
-    OpenApiParameter, OpenApiResponse,
-)
 
-
-@extend_schema_view(
-    create=extend_schema(
-        summary="Start or retrieve a chat",
-        request=ChatCreateSerializer,
-        responses={201: ChatListSerializer}
-    ),
-    list=extend_schema(
-        summary="List chats for authenticated user",
-        responses={200: ChatListSerializer(many=True)}
-    ),
-)
 class ChatViewSet(viewsets.GenericViewSet,
                   mixins.CreateModelMixin,
                   mixins.ListModelMixin):
@@ -46,8 +35,11 @@ class ChatViewSet(viewsets.GenericViewSet,
 
     def get_queryset(self):
         user = self.request.user
+
+        # Base chats for this user
         base = Chat.objects.filter(Q(buyer=user) | Q(owner=user))
-        last_msg = Message.objects.filter(chat=OuterRef('id')).order_by('-timestamp')
+
+        # Prefetch only the feature image for each product
         feature_prefetch = Prefetch(
             'product__media',
             queryset=ProductMedia.objects.filter(is_feature=True),
@@ -56,44 +48,35 @@ class ChatViewSet(viewsets.GenericViewSet,
 
         return (
             base
-            .select_related('buyer', 'owner', 'product__seller')
+            .select_related('buyer', 'owner', 'product', 'last_message')
+            .only(
+             'id','updated_at','last_message',
+             'buyer__id','buyer__full_username','buyer__avatar','buyer__city',
+             'owner__id','owner__full_username','owner__avatar','owner__city',
+             'product__slug','product__name','product__price','product__condition',
+           )
             .prefetch_related(feature_prefetch)
             .annotate(
-                last_text=Subquery(last_msg.values('text')[:1]),
-                last_ts=Subquery(last_msg.values('timestamp')[:1]),
-                unread=Count(
-                    'messages',
-                    filter=Q(messages__is_read=False) & ~Q(messages__sender=user)
+                # unread count still via subquery (or you can add a denorm field later)
+                unread=Coalesce(
+                    Subquery(
+                        Message.objects
+                               .filter(chat=OuterRef('pk'), is_read=False)
+                               .exclude(sender=user)
+                               .values('chat')
+                               .annotate(c=Count('id'))
+                               .values('c')[:1],
+                        output_field=IntegerField()
+                    ),
+                    Value(0)
                 )
             )
             .order_by('-updated_at')
         )
 
 
-@extend_schema_view(
-    list=extend_schema(
-        summary="List messages in a chat",
-        parameters=[
-            OpenApiParameter(
-                name='chat_pk',
-                description='Chat UUID',
-                required=True,
-                type=str,
-                location=OpenApiParameter.PATH
-            )
-        ],
-        responses={200: MessageSerializer(many=True)}
-    ),
-    create=extend_schema(
-        summary="Send a new message in a chat",
-        request=MessageSerializer,
-        responses={201: MessageSerializer}
-    ),
-    destroy=extend_schema(
-        summary="Delete a message",
-        responses={204: None}
-    ),
-)
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 class MessageViewSet(viewsets.GenericViewSet,
                      mixins.ListModelMixin,
                      mixins.CreateModelMixin,
@@ -104,7 +87,7 @@ class MessageViewSet(viewsets.GenericViewSet,
     pagination_class = MessageCursorPagination
 
     def get_chat(self):
-        # we only use chat_pk
+        
         chat = get_object_or_404(Chat, id=self.kwargs['chat_pk'])
         user = self.request.user
         if not (chat.buyer == user or chat.owner == user or user.is_staff):
@@ -114,15 +97,17 @@ class MessageViewSet(viewsets.GenericViewSet,
     def get_queryset(self):
         return (
             Message.objects
-                   .filter(chat=self.get_chat())
-                   .select_related('sender')
+                   .filter(chat_id=self.kwargs['chat_pk'])
+                   .select_related('chat')
+                   .order_by('-timestamp')
         )
 
     def list(self, request, *args, **kwargs):
-        chat = self.get_chat()
-        # mark unread messages as read in one query
-        chat.messages.filter(is_read=False).exclude(sender=request.user) \
-            .update(is_read=True)
+        
+        Message.objects.filter(
+            chat_id=kwargs['chat_pk'],
+            is_read=False
+        ).exclude(sender=request.user).update(is_read=True)
         return super().list(request, *args, **kwargs)
 
     def perform_create(self, serializer):
@@ -133,7 +118,17 @@ class MessageViewSet(viewsets.GenericViewSet,
         msg = get_object_or_404(Message, id=self.kwargs['pk'], chat=chat)
         user = request.user
 
-        if not (msg.sender == user or user.is_staff):
+        if not (msg.sender == user):
             raise PermissionDenied('Cannot delete this message.')
+        
+        # notify through WS
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"chat_{str(chat.id)}",
+            {
+                'type': 'message.deleted',
+                'message_id': str(self.kwargs['pk']),
+            }
+        )
         
         return super().destroy(request, *args, **kwargs)

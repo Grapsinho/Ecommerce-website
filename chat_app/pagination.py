@@ -7,6 +7,6 @@ class MessageCursorPagination(pagination.CursorPagination):
 
 
 class ChatCursorPagination(pagination.CursorPagination):
-    page_size = 2
+    page_size = 7
     ordering = '-updated_at'
     cursor_query_param = 'cursor'

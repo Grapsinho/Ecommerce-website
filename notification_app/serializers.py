@@ -2,7 +2,7 @@ from rest_framework import serializers
 from chat_app.models import Message
 
 class NotificationSerializer(serializers.ModelSerializer):
-    chat_id = serializers.CharField(source='chat_id')
+    chat_id = serializers.CharField()
     sender_full_username = serializers.CharField(source='sender.full_username')
     sender_avatar = serializers.CharField(source='sender.avatar.url')
     message = serializers.CharField(source='text')
