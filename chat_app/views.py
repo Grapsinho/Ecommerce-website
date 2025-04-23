@@ -29,51 +29,45 @@ class ChatViewSet(viewsets.GenericViewSet,
     queryset = Chat.objects.all()
 
     def get_serializer_class(self):
-        if self.action == 'create':
-            return ChatCreateSerializer
-        return ChatListSerializer
+        return ChatCreateSerializer if self.action == 'create' else ChatListSerializer
 
     def get_queryset(self):
         user = self.request.user
-
-        # Base chats for this user
         base = Chat.objects.filter(Q(buyer=user) | Q(owner=user))
 
-        # Prefetch only the feature image for each product
+        # Prefetch only feature image
         feature_prefetch = Prefetch(
             'product__media',
             queryset=ProductMedia.objects.filter(is_feature=True),
             to_attr='feature_media'
         )
 
+        # Annotate unread count
+        unread_subq = Message.objects.filter(
+            chat=OuterRef('pk'), is_read=False
+        ).exclude(sender=user).values('chat') \
+         .annotate(c=Count('id')).values('c')
+
+        # Annotate last message fields via Subquery to avoid join
+        last_msg_qs = Message.objects.filter(chat=OuterRef('pk')).order_by('-timestamp')
+
         return (
             base
-            .select_related('buyer', 'owner', 'product', 'last_message')
+            .select_related('buyer', 'owner', 'product')
             .only(
-             'id','updated_at','last_message',
-             'buyer__id','buyer__full_username','buyer__avatar','buyer__city',
-             'owner__id','owner__full_username','owner__avatar','owner__city',
-             'product__slug','product__name','product__price','product__condition',
-           )
+                'id','updated_at',
+                'buyer__id','buyer__full_username','buyer__avatar','buyer__city',
+                'owner__id','owner__full_username','owner__avatar','owner__city',
+                'product__slug','product__name','product__price','product__condition',
+            )
             .prefetch_related(feature_prefetch)
             .annotate(
-                # unread count still via subquery (or you can add a denorm field later)
-                unread=Coalesce(
-                    Subquery(
-                        Message.objects
-                               .filter(chat=OuterRef('pk'), is_read=False)
-                               .exclude(sender=user)
-                               .values('chat')
-                               .annotate(c=Count('id'))
-                               .values('c')[:1],
-                        output_field=IntegerField()
-                    ),
-                    Value(0)
-                )
+                unread=Coalesce(Subquery(unread_subq[:1], output_field=IntegerField()), Value(0)),
+                last_message_text=Subquery(last_msg_qs.values('text')[:1]),
+                last_message_timestamp=Subquery(last_msg_qs.values('timestamp')[:1])
             )
             .order_by('-updated_at')
         )
-
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync

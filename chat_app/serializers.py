@@ -82,18 +82,12 @@ class ChatListSerializer(serializers.ModelSerializer):
             'city': other.city,
         }
     
-    def get_last_message(self, chat):
-        """
-        Return a dict with text & timestamp of the denormalized last_message,
-        or None if there are no messages yet.
-        """
-        msg = getattr(chat, 'last_message', None)
-        if not msg:
+    def get_last_message(self, obj):
+        text = getattr(obj, 'last_message_text', None)
+        ts = getattr(obj, 'last_message_timestamp', None)
+        if text is None or ts is None:
             return None
-        return {
-            'text':      msg.text,
-            'timestamp': msg.timestamp,
-        }
+        return {'text': text, 'timestamp': ts}
 
 class MessageSerializer(serializers.ModelSerializer):
     sender_id = serializers.UUIDField(source='sender.id', read_only=True)
