@@ -1,11 +1,13 @@
 from rest_framework import viewsets, mixins, permissions
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.throttling import ScopedRateThrottle
 from django.shortcuts import get_object_or_404
 from django.db.models import (
     Prefetch, Q, OuterRef, Subquery,
     F
 )
 
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse
 
 from .models import Chat, Message
 from .serializers import (
@@ -17,12 +19,27 @@ from users.authentication import JWTAuthentication
 from product_management.models import ProductMedia
 
 
+@extend_schema_view(
+    list=extend_schema(
+        summary='List all chats for the user',
+        responses={200: ChatListSerializer(many=True)},
+        tags=['Chats'],
+    ),
+    create=extend_schema(
+        summary='Create or get existing chat',
+        request=ChatCreateSerializer,
+        responses={201: ChatListSerializer},
+        tags=['Chats'],
+    ),
+)
 class ChatViewSet(viewsets.GenericViewSet,
                   mixins.CreateModelMixin,
                   mixins.ListModelMixin):
     authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = ChatCursorPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'chat_create'
 
     # only needed for create(); list() uses get_queryset()
     queryset = Chat.objects.all()
@@ -64,6 +81,20 @@ class ChatViewSet(viewsets.GenericViewSet,
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+
+@extend_schema_view(
+    list=extend_schema(
+        summary='Retrieve messages and mark unread as read',
+        responses={200: MessageSerializer(many=True)},
+        tags=['Messages'],
+    ),
+    create=extend_schema(
+        summary='Send a new message in a chat',
+        request=MessageSerializer,
+        responses={201: MessageSerializer},
+        tags=['Messages'],
+    ),
+)
 class MessageViewSet(viewsets.GenericViewSet,
                      mixins.ListModelMixin,
                      mixins.CreateModelMixin,
@@ -72,6 +103,8 @@ class MessageViewSet(viewsets.GenericViewSet,
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = MessageSerializer
     pagination_class = MessageCursorPagination
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'message_send'
 
     def get_chat(self):
         
@@ -92,7 +125,7 @@ class MessageViewSet(viewsets.GenericViewSet,
     def list(self, request, *args, **kwargs):
         chat_id = kwargs['chat_pk']
         user = request.user
-        
+
         qs = Message.objects.filter(chat_id=chat_id, is_read=False).exclude(sender=user)
         unread_count = qs.count()
 
