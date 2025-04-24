@@ -46,7 +46,7 @@ class SimpleCategorySerializer(serializers.ModelSerializer):
 class SellerSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['full_username', 'phone_number', 'city']
+        fields = ['full_username', 'phone_number', 'city', 'id']
 
 
 # ---------------------------

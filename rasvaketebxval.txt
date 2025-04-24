@@ -1,10 +1,13 @@
 
-მერე უკვე უნდა დავიწყო მუშაობა რევიუ რეიტინგზე.
-
-მოკლედ ვიშლისტის და რევიუ რეიტინგის კოდი დაწერილია, რათქმაუნდა გატესტვა უნდა.
-
-
 დეპლოის დროს ეს ქომანდი უნდა გავუშვა: python manage.py check --deploy
 
 
 GET /products/shop/items/?price_min=21&price_max=70&condition=&category=pet-supplies
+
+
+
+D:\Django_saswavlo\Buy-Sell-ecommerce\chat_app\serializers.py: Warning [ChatViewSet > ChatListSerializer]: unable to resolve type hint for function "get_other_user". Consider using a type hint or @extend_schema_field. Defaulting to string.
+D:\Django_saswavlo\Buy-Sell-ecommerce\chat_app\serializers.py: Warning [ChatViewSet > ChatListSerializer > ProductPreviewSerializer]: unable to resolve type hint for function "get_feature_image". Consider using a type hint or @extend_schema_field. Defaulting to string.
+
+
+notification link will be something like this: http://127.0.0.1:8000/notifications/?before=cD0yMDI1LTA0LTIzKzE2JTNBMDklM0EzMC41NjEzMjclMkIwMCUzQTAw&unread_only=true

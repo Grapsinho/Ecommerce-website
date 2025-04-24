@@ -25,6 +25,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,6 +40,8 @@ INSTALLED_APPS = [
     "review_rating.apps.ReviewRatingConfig",
     "wishlist_app.apps.WishlistAppConfig",
     "product_cart.apps.ProductCartConfig",
+    "chat_app.apps.ChatAppConfig",
+    "notification_app.apps.NotificationAppConfig",
 
     # external app
     "mptt",
@@ -93,6 +97,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+ASGI_APPLICATION = 'core.asgi.application'
+
 # custom user
 AUTH_USER_MODEL = "users.User"
 
@@ -108,12 +114,15 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
     ],
 
     'DEFAULT_THROTTLE_RATES': {
         'anon': '20/minute',
         'user': '35/minute',
         'email_confirmation': '3/minute',
+        'chat_create': '10/min',
+        'message_send': '20/min',
     },
 }
 
@@ -144,6 +153,8 @@ SPECTACULAR_SETTINGS = {
 
 redis_url = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1")
 
+redis_url_websocket = os.environ.get("REDIS_URL_WEBSOCKET", "redis://127.0.0.1:6379/1")
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
@@ -155,6 +166,16 @@ CACHES = {
     }
 }
 
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [redis_url_websocket],
+        },
+    },
+}
 
 # changed into postgres database for development as well as production
 
