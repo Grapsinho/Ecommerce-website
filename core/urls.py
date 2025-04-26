@@ -28,6 +28,9 @@ urlpatterns = [
     # notifications
     path('', include('notification_app.urls')),
 
+    # order processing
+    path('user/', include('orders.urls')),
+
     # YOUR PATTERNS
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:

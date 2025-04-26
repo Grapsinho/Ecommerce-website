@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Order & Cart API Tester</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 2rem;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 1rem;
+      }
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 0.5rem;
+        text-align: left;
+      }
+      label {
+        display: block;
+        margin-top: 1rem;
+      }
+      input,
+      select {
+        width: 300px;
+        padding: 0.5rem;
+      }
+      button {
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 1rem;
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Cart & Order API Tester</h1>
+
+    <section>
+      <h2>Your Cart Items</h2>
+      <table id="cart-table">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="4">Loading…</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <hr />
+
+    <section>
+      <h2>1. Checkout</h2>
+      <form id="checkout-form">
+        <label>
+          Shipping Method:
+          <select id="shipping-method">
+            <option value="1">Pick-up (free)</option>
+            <option value="2">City Delivery ($4)</option>
+            <option value="3">Regional Delivery ($6)</option>
+          </select>
+        </label>
+
+        <div id="address-fields" style="display: none">
+          <label>
+            Street:
+            <input type="text" id="street" placeholder="123 Maple St" />
+          </label>
+          <label>
+            City:
+            <input type="text" id="city" placeholder="Tbilisi" />
+          </label>
+          <label>
+            Region:
+            <input type="text" id="region" placeholder="Vake" />
+          </label>
+          <label>
+            Postal Code:
+            <input type="text" id="postal_code" placeholder="0179" />
+          </label>
+        </div>
+
+        <button type="submit">Place Order</button>
+      </form>
+
+      <h3>Checkout Response:</h3>
+      <pre id="checkout-response">—</pre>
+    </section>
+
+    <hr />
+
+    <section>
+      <h2>2. List My Orders</h2>
+      <button id="get-orders-btn">Fetch Orders</button>
+      <h3>Orders Response:</h3>
+      <pre id="orders-response">—</pre>
+    </section>
+
+    <script>
+      const cartApiBase = "http://127.0.0.1:8000/cart";
+      const orderApiBase = "http://127.0.0.1:8000/user";
+
+      // Fetch and render cart items on page load
+      document.addEventListener("DOMContentLoaded", fetchCartItems);
+      async function fetchCartItems() {
+        const tbody = document.querySelector("#cart-table tbody");
+        tbody.innerHTML = "<tr><td colspan='4'>Loading…</td></tr>";
+        try {
+          const res = await fetch(`${cartApiBase}/cart-items/`, {
+            credentials: "include",
+          });
+          const data = await res.json();
+          console.log(data);
+          if (!Array.isArray(data.items))
+            throw new Error("Unexpected response");
+
+          if (data.items.length === 0) {
+            tbody.innerHTML =
+              "<tr><td colspan='4'>Your cart is empty</td></tr>";
+            return;
+          }
+
+          tbody.innerHTML = "";
+          data.items.forEach((item) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+            <td>${item.name}</td>
+            <td>${item.quantity}</td>
+            <td>${item.unit_price}</td>
+            <td>${(item.quantity * parseFloat(item.unit_price)).toFixed(2)}</td>
+          `;
+            tbody.appendChild(tr);
+          });
+        } catch (err) {
+          tbody.innerHTML = `<tr><td colspan='4'>Error loading cart: ${err.message}</td></tr>`;
+        }
+      }
+
+      // Show/hide address fields
+      const shippingSelect = document.getElementById("shipping-method");
+      const addressFields = document.getElementById("address-fields");
+      shippingSelect.addEventListener("change", () => {
+        addressFields.style.display = ["2", "3"].includes(shippingSelect.value)
+          ? "block"
+          : "none";
+      });
+
+      // Handle checkout
+      document
+        .getElementById("checkout-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const method = shippingSelect.value;
+          const payload = { shipping_method: parseInt(method, 10) };
+
+          if (["2", "3"].includes(method)) {
+            payload.address = {
+              street: document.getElementById("street").value,
+              city: document.getElementById("city").value,
+              region: document.getElementById("region").value,
+              postal_code: document.getElementById("postal_code").value,
+            };
+          }
+
+          const res = await fetch(`${orderApiBase}/checkout/`, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          document.getElementById("checkout-response").textContent =
+            JSON.stringify({ status: res.status, body: data }, null, 2);
+
+          // Refresh cart display after checkout
+          if (res.ok) fetchCartItems();
+        });
+
+      // Fetch orders
+      document
+        .getElementById("get-orders-btn")
+        .addEventListener("click", async () => {
+          const res = await fetch(`${orderApiBase}/orders/`, {
+            credentials: "include",
+          });
+          const data = await res.json();
+          document.getElementById("orders-response").textContent =
+            JSON.stringify({ status: res.status, body: data }, null, 2);
+        });
+    </script>
+  </body>
+</html>

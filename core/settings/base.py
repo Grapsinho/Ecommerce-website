@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "product_cart.apps.ProductCartConfig",
     "chat_app.apps.ChatAppConfig",
     "notification_app.apps.NotificationAppConfig",
+    "orders.apps.OrdersConfig",
 
     # external app
     "mptt",
