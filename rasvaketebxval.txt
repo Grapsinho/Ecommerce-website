@@ -12,3 +12,9 @@ D:\Django_saswavlo\Buy-Sell-ecommerce\orders\views.py: Warning [OrderViewSet]: c
 
 
 notification link will be something like this: http://127.0.0.1:8000/notifications/?before=cD0yMDI1LTA0LTIzKzE2JTNBMDklM0EzMC41NjEzMjclMkIwMCUzQTAw&unread_only=true
+
+
+Celery: Installing collected packages: vine, python-dateutil, prompt-toolkit, colorama, billiard, click, amqp, kombu, click-repl, click-plugins, click-didyoumean, celery
+
+
+product cartShi feature image ver modis

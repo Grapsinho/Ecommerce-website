@@ -5,8 +5,7 @@ from django.db.models.signals import post_save
 
 from .models import Order, OrderStatusHistory
 from product_management.models import Product
-from django.core.mail import send_mail
-from django.conf import settings
+from .tasks import send_order_placed_email, send_order_delivered_email
 
 
 def process_order_creation(order):
@@ -24,46 +23,63 @@ def process_order_creation(order):
     OrderStatusHistory.objects.create(order=order, status=order.status)
 
     def _send():
-        expected = order.expected_delivery_date
-        subject = f"Your order {order.id} has been placed"
-        message = (
-            f"Hello {order.user.full_username},\n"
-            f"Your order {order.id} has been successfully placed.\n"
-            f"Total: ${order.total_amount} via {order.shipping_method.get_name_display()}.\n"
-            f"Expected delivery by {expected:%Y-%m-%d %H:%M}.\n"
+        send_order_placed_email.delay(
+            str(order.id),
+            order.user.email,
+            order.user.full_username,
+            float(order.total_amount),
+            order.shipping_method.get_name_display(),
+            order.expected_delivery_date.isoformat(),
         )
-        from_email = settings.EMAIL_HOST_USER
-        send_mail(subject, message, from_email, [order.user.email], fail_silently=False)
 
     transaction.on_commit(_send)
 
 
 @receiver(post_save, sender=Order)
-@transaction.atomic
 def handle_order_status_change(sender, instance, created, **kwargs):
+    """
+    On any Order.save():
+      - If created: record initial history + send “placed” email.
+      - If status changed: record new history, update progress_percentage,
+        and if delivered send “delivered” email.
+    """
+    # Fetch the last history entry (if any)
+    last = (
+        OrderStatusHistory.objects
+        .filter(order=instance)
+        .order_by('-timestamp')
+        .first()
+    )
+
+    # 1) Create history on creation or status-change
+    if created or (last and last.status != instance.status):
+        OrderStatusHistory.objects.create(order=instance, status=instance.status)
+
+    # 2) On creation: send “order placed” email via Celery
     if created:
-        return
+        transaction.on_commit(lambda: send_order_placed_email.delay(
+            str(instance.id),
+            instance.user.email,
+            instance.user.full_username,
+            float(instance.total_amount),
+            instance.shipping_method.get_name_display(),
+            instance.expected_delivery_date.isoformat(),
+        ))
 
-    last = OrderStatusHistory.objects.filter(order=instance).order_by('-timestamp').first()
-    if last and last.status == instance.status:
-        return
+    # 3) On status change: update progress and possibly send “delivered” email
+    if not created and last and last.status != instance.status:
+        pct_map = {
+            Order.Status.PENDING:    0,
+            Order.Status.PROCESSING: 33,
+            Order.Status.SHIPPED:    66,
+            Order.Status.DELIVERED:  100,
+        }
+        new_pct = pct_map.get(instance.status, 0)
+        Order.objects.filter(pk=instance.pk).update(progress_percentage=new_pct)
 
-    OrderStatusHistory.objects.create(order=instance, status=instance.status)
-
-    pct_map = {
-        Order.Status.PENDING: 0,
-        Order.Status.PROCESSING: 33,
-        Order.Status.SHIPPED: 66,
-        Order.Status.DELIVERED: 100,
-    }
-    new_pct = pct_map.get(instance.status, 0)
-    Order.objects.filter(pk=instance.pk).update(progress_percentage=new_pct)
-
-    if instance.status == Order.Status.DELIVERED:
-        subject = f"Your order {instance.id} has been delivered"
-        message = (
-            f"Hello {instance.user.full_username},\n"
-            f"Your order {instance.id} has been delivered. Thank you for shopping!"
-        )
-        from_email = settings.EMAIL_HOST_USER
-        transaction.on_commit(lambda: send_mail(subject, message, from_email, [instance.user.email], fail_silently=False))
+        if instance.status == Order.Status.DELIVERED:
+            transaction.on_commit(lambda: send_order_delivered_email.delay(
+                str(instance.id),
+                instance.user.email,
+                instance.user.full_username,
+            ))

@@ -55,13 +55,5 @@ class OrderViewSet(
         except ValueError as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        orders_qs = orders_qs.prefetch_related(
-            Prefetch(
-                'items__product__media',
-                queryset=ProductMedia.objects.filter(is_feature=True),
-                to_attr='feature_media'
-            )
-        )
-        
         serializer = self.get_serializer(orders_qs, many=True)
         return Response({'orders': serializer.data}, status=status.HTTP_201_CREATED)
