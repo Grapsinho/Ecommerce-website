@@ -6,7 +6,7 @@ GET /products/shop/items/?price_min=21&price_max=70&condition=&category=pet-supp
 
 
 
-D:\Django_saswavlo\Buy-Sell-ecommerce\orders\views.py: Error [CheckoutAPIView]: unable to guess serializer. This is graceful fallback handling for APIViews. Consider using GenericAPIView as view base class, if view is under your control. Either way you may want to add a serializer_class (or method). Ignoring view for now.
+D:\Django_saswavlo\Buy-Sell-ecommerce\orders\serializers.py: Warning [OrderViewSet > OrderSerializer > OrderItemSerializer]: unable to resolve type hint for function "get_feature_image". Consider using a type hint or @extend_schema_field. Defaulting to string.  
 D:\Django_saswavlo\Buy-Sell-ecommerce\orders\views.py: Warning [OrderViewSet]: could not derive type of path parameter "id" because it is untyped and obtaining queryset from the viewset failed. Consider adding a type to the path (e.g. <int:id>) or annotating the parameter type with @extend_schema. Defaulting to "string".
 
 
@@ -18,3 +18,14 @@ Celery: Installing collected packages: vine, python-dateutil, prompt-toolkit, co
 
 
 product cartShi feature image ver modis
+
+1) erti shevamowmo kide
+
+2) kidev gadavamowmebino kodi
+
+3) dokumentacia aq da iqac.
+
+
+1) vamowmeb carts DONE
+2) meili igzavneba DONE
+3) checkout mushaobs DONE

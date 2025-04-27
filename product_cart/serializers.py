@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from .models import CartItem, Cart
-from product_management.models import Product
+from product_management.models import Product, ProductMedia
 
 from drf_spectacular.utils import (
     extend_schema_serializer,
@@ -85,6 +85,13 @@ class CartItemSerializer(serializers.ModelSerializer):
                 raise ValidationError({'quantity': 'Exceeds available stock.'})
             item.quantity += quantity
             item.save(update_fields=['quantity'])
+        
+        featured = list(ProductMedia.objects.filter(
+            product=item.product,
+            is_feature=True
+        ))
+        item.product.featured_media = featured
+
         return item
 
     def update(self, instance, validated_data):

@@ -7,7 +7,7 @@ from django.db.models import (
     F
 )
 
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiResponse
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from .models import Chat, Message
 from .serializers import (

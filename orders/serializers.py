@@ -4,12 +4,24 @@ from .models import Address, ShippingMethod, Order, OrderItem
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ['street', 'city', 'region', 'postal_code']
+        fields = ['id', 'street', 'city', 'region', 'postal_code']
 
 class ShippingMethodSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShippingMethod
         fields = ['id', 'name', 'flat_fee', 'lead_time_min', 'lead_time_max']
+
+class AddressInputSerializer(serializers.Serializer):
+    street = serializers.CharField()
+    city = serializers.CharField()
+    region = serializers.CharField()
+    postal_code = serializers.CharField()
+
+class CheckoutSerializer(serializers.Serializer):
+    shipping_method = serializers.PrimaryKeyRelatedField(
+        queryset=ShippingMethod.objects.all()
+    )
+    address = AddressInputSerializer(required=False)
 
 class OrderItemSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source='product.name', read_only=True)

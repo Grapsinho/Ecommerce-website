@@ -1,23 +1,24 @@
+import logging
 from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
-from datetime import datetime
+from django.utils.dateparse import parse_datetime
+from django.utils import timezone
 
+logger = logging.getLogger("rest_framework")
 
 @shared_task
-def send_order_placed_email(order_id, user_email, user_name,
-                            total_amount, method_display,
-                            expected_date_iso):
-    """
-    expected_date_iso is an ISO-format string, e.g. '2025-04-26T22:00:00'
-    We parse it here and then format for the user.
-    """
-    # Try to parse back into a datetime
+def send_order_placed_email(
+    order_id, user_email, user_name,
+    total_amount, method_display,
+    expected_date_iso
+):
     try:
-        dt = datetime.fromisoformat(expected_date_iso)
-        expected_display = dt.strftime('%Y-%m-%d %H:%M')
+        dt = parse_datetime(expected_date_iso)
+        if dt is not None and timezone.is_naive(dt):
+            dt = timezone.make_aware(dt, timezone.get_current_timezone())
+        expected_display = timezone.localtime(dt).strftime('%Y-%m-%d %H:%M')
     except Exception:
-        # If parsing fails, just show the raw string
         expected_display = expected_date_iso
 
     subject = f"Your order {order_id} has been placed"
@@ -28,7 +29,7 @@ def send_order_placed_email(order_id, user_email, user_name,
         f"Expected delivery by {expected_display}.\n"
     )
     send_mail(subject, message, settings.EMAIL_HOST_USER, [user_email])
-
+    logger.info(f"Sent 'placed' email for order {order_id}")
 
 @shared_task
 def send_order_delivered_email(order_id, user_email, user_name):
@@ -38,3 +39,4 @@ def send_order_delivered_email(order_id, user_email, user_name):
         f"Your order {order_id} has been delivered. Thank you for shopping!"
     )
     send_mail(subject, message, settings.EMAIL_HOST_USER, [user_email])
+    logger.info(f"Sent 'delivered' email for order {order_id}")

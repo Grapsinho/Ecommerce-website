@@ -80,7 +80,25 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order {self.id} by {self.user.email}"
+    
+    def save(self, *args, **kwargs):
+        # Ensure progress_percentage always matches status
+        pct_map = {
+            Order.Status.PENDING:    0,
+            Order.Status.PROCESSING: 33,
+            Order.Status.SHIPPED:    66,
+            Order.Status.DELIVERED:  100,
+        }
+        # Only override if status has changed (or on create)
+        new_pct = pct_map.get(self.status, 0)
+        if self.progress_percentage != new_pct:
+            self.progress_percentage = new_pct
 
+        super().save(*args, **kwargs)
+
+    @staticmethod
+    def calculate_expected_delivery(method):
+        return timezone.now() + method.lead_time_max
 
 class OrderItem(models.Model):
     order = models.ForeignKey(
@@ -95,6 +113,11 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['order', 'product'], name='unique_order_product')
+        ]
 
     def __str__(self):
         return f"{self.quantity}x {self.product.name}"  
