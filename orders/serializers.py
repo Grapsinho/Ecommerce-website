@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils import timezone
 from .models import Address, ShippingMethod, Order, OrderItem
 
 class AddressSerializer(serializers.ModelSerializer):
@@ -32,15 +33,12 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = ['product_name', 'quantity', 'unit_price', 'subtotal', 'feature_image']
 
     def get_feature_image(self, obj):
-        # first, see if view prefetched into .feature_media
         media_qs = getattr(obj.product, 'feature_media', None)
-        # otherwise, fall back to querying the real manager
         if media_qs is None:
             media_qs = obj.product.media.filter(is_feature=True)
         if not media_qs:
             return None
-        first = media_qs[0]
-        return first.image.url if first.image else None
+        return media_qs[0].image.url if media_qs[0].image else None
 
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
@@ -50,6 +48,36 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
-            'id', 'status', 'progress_percentage', 'expected_delivery_date',
-            'shipping_method', 'shipping_address', 'shipping_fee', 'total_amount', 'items'
+            'id', 'expected_delivery_date',
+            'shipping_method', 'shipping_address',
+            'shipping_fee', 'total_amount', 'items'
         ]
+
+class OrderDetailSerializer(OrderSerializer):
+    milestones = serializers.SerializerMethodField()
+    progress = serializers.SerializerMethodField()
+
+    class Meta(OrderSerializer.Meta):
+        fields = OrderSerializer.Meta.fields + ['milestones', 'progress']
+
+    def get_milestones(self, obj):
+        start = obj.created_at
+        min_delivery = start + obj.shipping_method.lead_time_min
+        delivered = obj.expected_delivery_date
+        return [
+            {'name': 'Preparing',    'time': start},
+            {'name': 'Min Delivery', 'time': min_delivery},
+            {'name': 'Delivered',    'time': delivered},
+        ]
+
+    def get_progress(self, obj):
+        now = timezone.now()
+        start = obj.created_at
+        end = obj.expected_delivery_date
+        if now <= start:
+            return 0
+        if now >= end:
+            return 100
+        elapsed = (now - start).total_seconds()
+        total = (end - start).total_seconds()
+        return (elapsed / total) * 100

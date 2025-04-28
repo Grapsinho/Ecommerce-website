@@ -1,5 +1,4 @@
 import uuid
-
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
@@ -42,23 +41,13 @@ class ShippingMethod(models.Model):
     def __str__(self):
         return self.name
 
-class Order(models.Model):
-    class Status(models.TextChoices):
-        PENDING = 'pending', 'Pending'
-        PROCESSING = 'processing', 'Processing'
-        SHIPPED = 'shipped', 'Shipped'
-        DELIVERED = 'delivered', 'Delivered'
 
+class Order(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='orders'
-    )
-    status = models.CharField(
-        max_length=10,
-        choices=Status.choices,
-        default=Status.PENDING
     )
     shipping_method = models.ForeignKey(
         ShippingMethod,
@@ -73,32 +62,17 @@ class Order(models.Model):
     shipping_fee = models.DecimalField(max_digits=10, decimal_places=2)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
     expected_delivery_date = models.DateTimeField()
-    progress_percentage = models.PositiveSmallIntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Order {self.id} by {self.user.email}"
-    
-    def save(self, *args, **kwargs):
-        # Ensure progress_percentage always matches status
-        pct_map = {
-            Order.Status.PENDING:    0,
-            Order.Status.PROCESSING: 33,
-            Order.Status.SHIPPED:    66,
-            Order.Status.DELIVERED:  100,
-        }
-        # Only override if status has changed (or on create)
-        new_pct = pct_map.get(self.status, 0)
-        if self.progress_percentage != new_pct:
-            self.progress_percentage = new_pct
-
-        super().save(*args, **kwargs)
 
     @staticmethod
     def calculate_expected_delivery(method):
         return timezone.now() + method.lead_time_max
+
 
 class OrderItem(models.Model):
     order = models.ForeignKey(
@@ -120,17 +94,4 @@ class OrderItem(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.quantity}x {self.product.name}"  
-
-
-class OrderStatusHistory(models.Model):
-    order = models.ForeignKey(
-        Order,
-        on_delete=models.CASCADE,
-        related_name='history'
-    )
-    status = models.CharField(max_length=10, choices=Order.Status.choices)
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Order {self.order.id} status changed to {self.status} at {self.timestamp}"
+        return f"{self.quantity}x {self.product.name}"
