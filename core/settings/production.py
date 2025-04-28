@@ -44,3 +44,11 @@ EMAIL_USE_TLS = email_use_tls
 EMAIL_PORT = email_port
 EMAIL_HOST_USER = email_host_user
 EMAIL_HOST_PASSWORD = email_host_password
+
+
+# allow Idempotency-Key in headers
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'Idempotency-Key',
+]

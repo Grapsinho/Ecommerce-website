@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from django.core.cache import cache
 from django.db.models import Prefetch
 
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes, extend_schema_view
+
 from users.authentication import JWTAuthentication
 from .models import Order, OrderItem
 from .serializers import (
@@ -17,6 +19,53 @@ from product_management.models import ProductMedia
 import logging
 logger = logging.getLogger("rest_framework")
 
+@extend_schema(
+    tags=['orders'],
+    parameters=[
+        OpenApiParameter(
+            name='id',
+            location=OpenApiParameter.PATH,
+            description='UUID of the order',
+            required=True,
+            type=OpenApiTypes.UUID,
+        )
+    ]
+)
+@extend_schema_view(
+    list=extend_schema(
+        summary="List Orders",
+        description="Retrieve a paginated list of your orders.",
+        responses={200: OrderSerializer(many=True)}
+    ),
+    retrieve=extend_schema(
+        summary="Retrieve Order",
+        description="Retrieve detailed information for a single order, including milestones and progress.",
+        parameters=[
+            OpenApiParameter(
+                name="id",
+                location=OpenApiParameter.PATH,
+                description="UUID of the order",
+                required=True,
+                type=OpenApiTypes.UUID,
+            )
+        ],
+        responses={200: OrderDetailSerializer}
+    ),
+    default_address=extend_schema(
+        summary="Get Default Address",
+        description="Returns the user's saved shipping address or HTTP 204 if none.",
+        responses={200: AddressSerializer, 204: None}
+    ),
+    checkout=extend_schema(
+        summary="Checkout Cart",
+        description=(
+            "Idempotent checkout endpoint that converts cart items into orders. "
+            "Supply `Idempotency-Key` header to retry without duplication."
+        ),
+        request=CheckoutSerializer,
+        responses={201: OrderDetailSerializer, 400: OpenApiTypes.OBJECT}
+    )
+)
 class OrderViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,

@@ -2,6 +2,9 @@ from rest_framework import serializers
 from django.utils import timezone
 from .models import Address, ShippingMethod, Order, OrderItem
 
+from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.types import OpenApiTypes
+
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = Address
@@ -32,6 +35,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         model = OrderItem
         fields = ['product_name', 'quantity', 'unit_price', 'subtotal', 'feature_image']
 
+    @extend_schema_field(OpenApiTypes.URI)
     def get_feature_image(self, obj):
         media_qs = getattr(obj.product, 'feature_media', None)
         if media_qs is None:
@@ -60,6 +64,7 @@ class OrderDetailSerializer(OrderSerializer):
     class Meta(OrderSerializer.Meta):
         fields = OrderSerializer.Meta.fields + ['milestones', 'progress']
 
+    @extend_schema_field(OpenApiTypes.OBJECT)
     def get_milestones(self, obj):
         start = obj.created_at
         min_delivery = start + obj.shipping_method.lead_time_min
@@ -70,6 +75,7 @@ class OrderDetailSerializer(OrderSerializer):
             {'name': 'Delivered',    'time': delivered},
         ]
 
+    @extend_schema_field(OpenApiTypes.FLOAT)
     def get_progress(self, obj):
         now = timezone.now()
         start = obj.created_at
