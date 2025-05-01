@@ -31,6 +31,9 @@ urlpatterns = [
     # order processing
     path('', include('orders.urls')),
 
+    # dashboard
+    path('', include('dashboard.urls')),
+
     # YOUR PATTERNS
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "chat_app.apps.ChatAppConfig",
     "notification_app.apps.NotificationAppConfig",
     "orders.apps.OrdersConfig",
+    "dashboard.apps.DashboardConfig",
 
     # external app
     "mptt",

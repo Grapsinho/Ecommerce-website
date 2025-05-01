@@ -24,5 +24,5 @@ urlpatterns = [
     path('token/refresh/', RefreshAccessTokenView.as_view(), name='token_refresh'),
 
     path("profile/<uuid:user_id>/", UserProfileView.as_view(), name="user-profile"),
-    path("profile/current/", CurrentUserProfileView.as_view(), name="current-user-profile"),
+    path("profile/me/", CurrentUserProfileView.as_view(), name="current-user-profile"),
 ]
