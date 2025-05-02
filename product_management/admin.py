@@ -12,7 +12,7 @@ class ProductMediaInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'stock', 'condition', 'seller', 'created_at', 'is_active')
+    list_display = ('id', 'name', 'price', 'stock', 'condition', 'seller', 'created_at', 'is_active')
     list_filter = ('condition', 'is_active', 'created_at', 'category')
     search_fields = ('name', 'description', 'seller__username')
     ordering = ('-created_at',)

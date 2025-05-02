@@ -103,6 +103,21 @@ class OrderViewSet(
             return OrderDetailSerializer
         return OrderSerializer
 
+    def list(self, request, *args, **kwargs):
+        # 1. Fetch the full queryset and count it
+        qs = self.get_queryset()
+        total_orders = qs.count()
+
+        # 2. Apply pagination
+        page = self.paginate_queryset(qs)
+        serializer = self.get_serializer(page, many=True)
+        response = self.get_paginated_response(serializer.data)
+
+        # 3. Inject the total into the response payload
+        response.data['total_orders'] = total_orders
+        return response
+
+
     @action(detail=False, methods=['get'], url_path='default-address')
     def default_address(self, request):
         user = request.user

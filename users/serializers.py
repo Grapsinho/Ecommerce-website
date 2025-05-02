@@ -147,11 +147,3 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         user.set_password(new_password)
         user.save()
         return user
-
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            'id', 'email', 'full_username', 'avatar', 'age', 'city', 'phone_number', 'created_at'
-        )

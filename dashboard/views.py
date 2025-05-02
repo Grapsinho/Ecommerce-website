@@ -1,25 +1,29 @@
-from django.db.models import Q, Prefetch
-from rest_framework import generics, filters
+from django.db.models import Prefetch
+from rest_framework import generics, filters, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import CursorPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework_extensions.cache.mixins import CacheResponseMixin
+from rest_framework.views import APIView
+from rest_framework.response import Response
+
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 
 from product_management.models import Product, ProductMedia
 from .services import Recommendations
 from .filters import MyProductFilter
 from users.authentication import JWTAuthentication
+from users.models import User
 from .serializers import (
     ProfileSerializer,
     MyProductSerializer,
     RecommendationSerializer
 )
 
-# 1. Profile Update
-class ProfileUpdateView(generics.RetrieveUpdateAPIView):
-    """
-    GET/PATCH /dashboard/profile/current/
-    """
+
+@extend_schema(tags=['Profile'], description="Retrieve or update current user's profile.")
+class ProfileUpdateRetrieveView(generics.RetrieveUpdateAPIView):
     serializer_class = ProfileSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -27,16 +31,44 @@ class ProfileUpdateView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
-# 2. Pagination & Filters for Products
+
+@extend_schema(
+    tags=['Profile'],
+    parameters=[
+        OpenApiParameter('user_id', OpenApiTypes.UUID, OpenApiParameter.PATH),
+    ],
+    responses={200: ProfileSerializer}
+)
+class UserProfileView(APIView):
+    authentication_classes = [JWTAuthentication]
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ProfileSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class StandardCursorPagination(CursorPagination):
     page_size = 10
     ordering = '-created_at'
 
-# 3. My Products List
+
+@extend_schema(
+    tags=['User Own Products'],
+    responses={200: MyProductSerializer(many=True)},
+    description="List current user's products, paginated."
+)
 class MyProductListView(generics.ListAPIView):
     """
     GET /dashboard/me/products/
     """
+    queryset = Product.objects.none()
     serializer_class = MyProductSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -56,9 +88,31 @@ class MyProductListView(generics.ListAPIView):
                 )
             )
         )
+    
+    def list(self, request, *args, **kwargs):
+        # 1. Fetch the full queryset and count it
+        qs = self.get_queryset()
+        total_products = qs.count()
 
-# 4. Recommendations
-class RecommendationView(CacheResponseMixin, generics.ListAPIView):
+        # 2. Apply pagination
+        page = self.paginate_queryset(qs)
+        serializer = self.get_serializer(page, many=True)
+        response = self.get_paginated_response(serializer.data)
+
+        # 3. Inject the total into the response payload
+        response.data['total_products'] = total_products
+        return response
+
+
+@extend_schema(
+    tags=['Recommendations'],
+    parameters=[
+        OpenApiParameter('limit', OpenApiTypes.INT, OpenApiParameter.QUERY, description='Max recommendations (1–10)')
+    ],
+    responses={200: RecommendationSerializer(many=True)},
+    description="Cross-sell recommendations based on cart, wishlist, and purchase history."
+)
+class RecommendationView(CacheResponseMixin, APIView):
     """
     GET /dashboard/me/recommendations/?limit=10
     """
@@ -70,12 +124,8 @@ class RecommendationView(CacheResponseMixin, generics.ListAPIView):
     serializer_class = RecommendationSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    pagination_class = None
 
-    def list(self, request, *args, **kwargs):
-        user = request.user
-        limit = request.query_params.get('limit', 10)
-        recs = Recommendations.for_user(user, limit)
-
-        serializer = self.get_serializer(recs, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get(self, request):
+        recs = Recommendations.for_user(request.user, request.query_params.get('limit', 10))
+        serializer = RecommendationSerializer(recs, many=True)
+        return Response(serializer.data)

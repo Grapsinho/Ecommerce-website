@@ -9,18 +9,15 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
 from .models import User
-from .serializers import RegisterSerializer, LoginUserSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer, UserProfileSerializer
+from .serializers import RegisterSerializer, LoginUserSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer
 from .throttles import EmailConfirmationRateThrottle, LoginRateThrottle
 from utils import email_confirm, set_jwt_token
-from .authentication import JWTAuthentication
-
-from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
 
 logger = logging.getLogger("rest_framework")
 
@@ -266,95 +263,6 @@ class LogoutUser(APIView):
         response.delete_cookie('refresh_token', samesite='None')
 
         return response
-
-
-class UserProfileView(APIView):
-    """
-    UserProfileView
-
-    Retrieves public profile information for a user specified by their UUID.
-    Authentication is required to access this endpoint.
-
-    **Path Parameter:**
-      - **user_id (UUID):** The UUID of the user whose profile is requested.
-
-    **Responses:**
-      - **200 OK:** Returns the user profile data using UserProfileSerializer.
-      - **401 Unauthorized:** When the access token is missing or invalid.
-      - **404 Not Found:** If the user with the given UUID does not exist.
-    """
-
-    authentication_classes = [JWTAuthentication]
-
-    permission_classes = [IsAuthenticated]
-
-    @extend_schema(
-        summary="Get User Profile by ID",
-        description="Returns public profile information of a user by their UUID. Authentication is required.",
-        parameters=[
-            OpenApiParameter(
-                name='user_id',
-                description='UUID of the user whose profile is being fetched.',
-                required=True,
-                type={'type': 'string', 'format': 'uuid'},
-                location=OpenApiParameter.PATH,
-            )
-        ],
-        responses={
-            200: OpenApiResponse(
-                response=UserProfileSerializer,
-                description="User profile retrieved successfully."
-            ),
-            401: OpenApiResponse(description="Unauthorized. Access token is missing or invalid."),
-            404: OpenApiResponse(description="User not found."),
-        },
-        tags=["Users"]
-    )
-    def get(self, request, user_id):
-        try:
-            user = User.objects.get(id=user_id)
-        except User.DoesNotExist:
-            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = UserProfileSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class CurrentUserProfileView(APIView):
-    """
-    CurrentUserProfileView
-
-    Returns the public profile information of the currently authenticated user.
-    
-    **Authentication:**
-      - Requires a valid JWT access token in HTTP-only cookies.
-    
-    **Responses:**
-      - **200 OK:** Returns the user profile data using UserProfileSerializer.
-      - **401 Unauthorized:** When the access token is missing or invalid.
-    """
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    @extend_schema(
-        summary="Get Current User Profile",
-        description="Returns public profile information of the currently authenticated user. No additional parameters are required.",
-        responses={
-            200: OpenApiResponse(
-                    response=UserProfileSerializer,
-                    description="Current user profile retrieved successfully."
-                ),
-            401: OpenApiResponse(
-                    description="Unauthorized. Access token is missing or invalid."
-                ),
-        },
-        tags=["Users"]
-    )
-    def get(self, request):
-        # Since the JWTAuthentication populates request.user on successful authentication,
-        # we can simply use that to get the current user's profile.
-        serializer = UserProfileSerializer(request.user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class PasswordResetRequestView(APIView):

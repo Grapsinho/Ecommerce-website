@@ -1,0 +1,194 @@
+[
+  {
+    "model": "product_management.product",
+    "pk": 3,
+    "fields": {
+      "seller": "d8755c56-03a3-4743-8ca5-5fe267e58bec",
+      "name": "iPhone X",
+      "description": "Apple iPhone X with edge‑to‑edge OLED display and Face ID.",
+      "slug": "iphone-x",
+      "price": "799.99",
+      "stock": 100,
+      "condition": "used",
+      "category": 21,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 4,
+    "fields": {
+      "seller": "d8755c56-03a3-4743-8ca5-5fe267e58bec",
+      "name": "Samsung Galaxy S21",
+      "description": "Samsung’s flagship Galaxy S21 with 120Hz AMOLED display.",
+      "slug": "samsung-galaxy-s21",
+      "price": "699.99",
+      "stock": 80,
+      "condition": "new",
+      "category": 21,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 5,
+    "fields": {
+      "seller": "d8755c56-03a3-4743-8ca5-5fe267e58bec",
+      "name": "Phone Charger",
+      "description": "Fast‑charging USB‑C power adapter, 20W output.",
+      "slug": "phone-charger-20w",
+      "price": "19.99",
+      "stock": 200,
+      "condition": "new",
+      "category": 24,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 6,
+    "fields": {
+      "seller": "d8755c56-03a3-4743-8ca5-5fe267e58bec",
+      "name": "Phone Case",
+      "description": "Shock‑proof TPU phone case, fits iPhone X/S21.",
+      "slug": "phone-case-tpu",
+      "price": "15.99",
+      "stock": 150,
+      "condition": "new",
+      "category": 24,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 7,
+    "fields": {
+      "seller": "d8755c56-03a3-4743-8ca5-5fe267e58bec",
+      "name": "Logitech Wireless Mouse",
+      "description": "Ergonomic USB receiver mouse, 2.4 GHz wireless.",
+      "slug": "logitech-wireless-mouse",
+      "price": "29.99",
+      "stock": 120,
+      "condition": "new",
+      "category": 24,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 8,
+    "fields": {
+      "seller": "d8755c56-03a3-4743-8ca5-5fe267e58bec",
+      "name": "HP Spectre x360",
+      "description": "Convertible 13-inch laptop with Intel i7, 16 GB RAM.",
+      "slug": "hp-spectre-x360",
+      "price": "1199.99",
+      "stock": 50,
+      "condition": "new",
+      "category": 22,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 9,
+    "fields": {
+      "seller": "d8755c56-03a3-4743-8ca5-5fe267e58bec",
+      "name": "Sony A7 III",
+      "description": "Full-frame mirrorless camera with 24MP sensor and 4K video.",
+      "slug": "sony-a7-iii",
+      "price": "1999.99",
+      "stock": 30,
+      "condition": "new",
+      "category": 23,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 10,
+    "fields": {
+      "seller": "d8755c56-03a3-4743-8ca5-5fe267e58bec",
+      "name": "USB-C Cable",
+      "description": "Durable braided USB‑C to USB‑C cable, 1 m length.",
+      "slug": "usb-c-cable-1m",
+      "price": "9.99",
+      "stock": 300,
+      "condition": "new",
+      "category": 24,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 11,
+    "fields": {
+      "seller": "d8755c56-03a3-4743-8ca5-5fe267e58bec",
+      "name": "Instant Pot Duo",
+      "description": "7‑in‑1 programmable pressure cooker for your kitchen.",
+      "slug": "instant-pot-duo",
+      "price": "89.99",
+      "stock": 60,
+      "condition": "new",
+      "category": 29,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 12,
+    "fields": {
+      "seller": "d8755c56-03a3-4743-8ca5-5fe267e58bec",
+      "name": "Mountain Bike",
+      "description": "27‑speed mountain bike with aluminum frame and front suspension.",
+      "slug": "mountain-bike-27-speed",
+      "price": "499.99",
+      "stock": 20,
+      "condition": "new",
+      "category": 35,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 13,
+    "fields": {
+      "seller": "4fc62b9b-a56f-4efe-be36-4a506503e29a",
+      "name": "Cooking Pan Set",
+      "description": "Nonstick cookware set, 5 pieces for everyday cooking.",
+      "slug": "cooking-pan-set",
+      "price": "79.99",
+      "stock": 40,
+      "condition": "new",
+      "category": 30,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  },
+  {
+    "model": "product_management.product",
+    "pk": 14,
+    "fields": {
+      "seller": "4fc62b9b-a56f-4efe-be36-4a506503e29a",
+      "name": "Office Chair",
+      "description": "Ergonomic swivel chair with lumbar support.",
+      "slug": "ergonomic-office-chair",
+      "price": "129.99",
+      "stock": 70,
+      "condition": "new",
+      "category": 72,
+      "created_at": "2025-04-14T12:00:00Z",
+      "updated_at": "2025-04-14T12:00:00Z"
+    }
+  }
+]

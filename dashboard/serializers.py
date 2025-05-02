@@ -2,6 +2,9 @@ from rest_framework import serializers
 from users.models import User
 from product_management.models import Product
 
+from drf_spectacular.utils import extend_schema_field
+from drf_spectacular.types import OpenApiTypes
+
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from PIL import Image
 import io
@@ -13,8 +16,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = User
-        fields = ['full_username', 'avatar', 'age', 'city', 'phone_number']
-        read_only_fields = []
+        fields = ['id', 'email', 'full_username', 'avatar', 'age', 'city', 'phone_number']
+        read_only_fields = ["id", "email"]
     
 
     def validate_avatar(self, avatar):
@@ -64,9 +67,18 @@ class BaseProductSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ['id','name','price','feature_image','stock','units_sold','average_rating']
 
+    @extend_schema_field(OpenApiTypes.URI)
     def get_feature_image(self, obj):
-        media_qs = getattr(obj, 'feature_media', None) or obj.media.filter(is_feature=True)
-        return media_qs[0].image.url if media_qs else None
+        # If we prefetched “feature_media”, it will exist (even as an empty list)
+        if hasattr(obj, 'feature_media'):
+            media_qs = obj.feature_media
+        else:
+            # only hit the DB if we truly didn’t prefetch
+            media_qs = obj.media.filter(is_feature=True)
+
+        if not media_qs:
+            return None
+        return media_qs[0].image.url
 
 class MyProductSerializer(BaseProductSerializer):
     class Meta(BaseProductSerializer.Meta):
@@ -75,3 +87,7 @@ class MyProductSerializer(BaseProductSerializer):
 class RecommendationSerializer(BaseProductSerializer):
     class Meta(BaseProductSerializer.Meta):
         model = Product
+
+class MyProductListResponseSerializer(serializers.Serializer):
+    results = MyProductSerializer(many=True)
+    total_products = serializers.IntegerField()
