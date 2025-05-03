@@ -87,7 +87,3 @@ class MyProductSerializer(BaseProductSerializer):
 class RecommendationSerializer(BaseProductSerializer):
     class Meta(BaseProductSerializer.Meta):
         model = Product
-
-class MyProductListResponseSerializer(serializers.Serializer):
-    results = MyProductSerializer(many=True)
-    total_products = serializers.IntegerField()

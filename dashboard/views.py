@@ -1,9 +1,8 @@
 from django.db.models import Prefetch
 from rest_framework import generics, filters, status
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.pagination import CursorPagination
+from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework_extensions.cache.mixins import CacheResponseMixin
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -52,11 +51,12 @@ class UserProfileView(APIView):
 
         serializer = ProfileSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
 
-
-class StandardCursorPagination(CursorPagination):
-    page_size = 10
-    ordering = '-created_at'
+class UserOwnProductPagination(PageNumberPagination):
+    page_size = 15
+    page_size_query_param = 'page_size'
+    max_page_size = 30
 
 
 @extend_schema(
@@ -72,7 +72,7 @@ class MyProductListView(generics.ListAPIView):
     serializer_class = MyProductSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
-    pagination_class = StandardCursorPagination
+    pagination_class = UserOwnProductPagination
     filter_backends = [filters.OrderingFilter, DjangoFilterBackend]
     ordering_fields = ['price', 'stock', 'units_sold']
     filterset_class = MyProductFilter
@@ -88,38 +88,20 @@ class MyProductListView(generics.ListAPIView):
                 )
             )
         )
-    
-    def list(self, request, *args, **kwargs):
-        # 1. Fetch the full queryset and count it
-        qs = self.get_queryset()
-        total_products = qs.count()
-
-        # 2. Apply pagination
-        page = self.paginate_queryset(qs)
-        serializer = self.get_serializer(page, many=True)
-        response = self.get_paginated_response(serializer.data)
-
-        # 3. Inject the total into the response payload
-        response.data['total_products'] = total_products
-        return response
 
 
 @extend_schema(
     tags=['Recommendations'],
     parameters=[
-        OpenApiParameter('limit', OpenApiTypes.INT, OpenApiParameter.QUERY, description='Max recommendations (1–10)')
+        OpenApiParameter('limit', OpenApiTypes.INT, OpenApiParameter.QUERY, description='Max recommendations (1-10)')
     ],
     responses={200: RecommendationSerializer(many=True)},
     description="Cross-sell recommendations based on cart, wishlist, and purchase history."
 )
-class RecommendationView(CacheResponseMixin, APIView):
+class RecommendationView(APIView):
     """
     GET /dashboard/me/recommendations/?limit=10
     """
-    cache_key_func = lambda view, method, req, args, kwargs: (
-        f"recs_user_{req.user.id}_lim_{req.query_params.get('limit', 10)}"
-    )
-    cache_response_timeout = 60 * 5
 
     serializer_class = RecommendationSerializer
     authentication_classes = [JWTAuthentication]

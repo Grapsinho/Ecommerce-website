@@ -19,3 +19,10 @@ Category.objects.rebuild()
 
 
 gasatestia axali damatebuli api
+
+
+gadavamowmo kodi
+
+gadaval mere cachingze.
+
+dashbordze iqneba: orderebi, useris productebi, chatebi, recomendaciebi. aeseni unda davcecho.

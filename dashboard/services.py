@@ -1,101 +1,92 @@
-from django.db.models import Q, Prefetch
+import datetime
+from collections import defaultdict, Counter
+
+from django.utils import timezone
+from django.db.models import Prefetch, Case, When, IntegerField, Value
+
 from product_management.models import Product, Category, ProductMedia
 from product_cart.models import CartItem
-from orders.models import OrderItem
 from wishlist_app.models import WishlistItem
+from orders.models import OrderItem
+
 
 class Recommendations:
+    CART_WEIGHT = 3
+    WISHLIST_WEIGHT = 2
+    LOOKBACK_DAYS = 180
+
     @staticmethod
     def for_user(user, limit=10):
         """
-        Optimized cross-sell recommendations:
-          - Include wishlist, cart, and past purchases for category seeds
-          - Exclude wishlist/cart/purchased products
-          - Single DB pass for sibling-category cross-sells
-          - Fallback bestsellers
-        Returns up to `limit` Product instances.
+        Return up to `limit` product recommendations based on cart and wishlist signals
+        (weighted by category), falling back to bestsellers. Excludes user's own,
+        purchased (last 6 months), cart, and wishlist items.
         """
-        # 1. Normalize limit
-        try:
-            limit = int(limit)
-        except (TypeError, ValueError):
-            limit = 10
-        limit = max(1, min(limit, 10))
+        limit = int(limit)
+        cutoff = timezone.now() - datetime.timedelta(days=Recommendations.LOOKBACK_DAYS)
 
-        # 2. Load all wishlist, cart, and purchased items at once
-        wishlist_items = list(
-            WishlistItem.objects
-                .filter(wishlist__user=user)
-                .select_related('product__category')
-        )
-        cart_items = list(
-            CartItem.objects
-                .filter(cart__user=user)
-                .select_related('product__category')
-        )
-        purchased_items = list(
+        # 1. Exclude products: recent purchases, cart, wishlist
+        purchased_ids = set(
             OrderItem.objects
-                .filter(order__user=user)
-                .select_related('product__category')
+                      .filter(order__user=user, order__created_at__gte=cutoff)
+                      .values_list('product_id', flat=True)
         )
+        cart_data = list(
+            CartItem.objects.filter(cart__user=user)
+                    .values_list('product_id', 'product__category_id', 'product__category__parent_id')
+        )
+        wishlist_data = list(
+            WishlistItem.objects.filter(wishlist__user=user)
+                        .values_list('product_id', 'product__category_id', 'product__category__parent_id')
+        )
+        cart_ids = {pid for pid, *_ in cart_data}
+        wishlist_ids = {pid for pid, *_ in wishlist_data}
+        excluded_ids = purchased_ids | cart_ids | wishlist_ids
 
-        # 3. Build exclusion and category sets in Python
-        exclude_ids = {
-            *{wi.product_id for wi in wishlist_items},
-            *{ci.product_id for ci in cart_items},
-            *{oi.product_id for oi in purchased_items},
-        }
-        all_cat_ids = {
-            *{wi.product.category_id for wi in wishlist_items},
-            *{ci.product.category_id for ci in cart_items},
-            *{oi.product.category_id for oi in purchased_items},
-        }
+        # 2. Compute weights and excluded children per parent group
+        cat_weights = Counter()
+        excluded_children = defaultdict(set)
+        for pid, cat_id, parent_id in cart_data:
+            group_id = parent_id or cat_id
+            cat_weights[group_id] += Recommendations.CART_WEIGHT
+            excluded_children[group_id].add(cat_id)
+        for pid, cat_id, parent_id in wishlist_data:
+            group_id = parent_id or cat_id
+            cat_weights[group_id] += Recommendations.WISHLIST_WEIGHT
+            excluded_children[group_id].add(cat_id)
 
-        # 4. Base queryset for products
-        feature_media_prefetch = Prefetch(
-            'media',
-            queryset=ProductMedia.objects.filter(is_feature=True),
-            to_attr='feature_media'
+        # 3. Base queryset with exclusions and eager loading of featured media
+        feature_prefetch = Prefetch(
+            'media', queryset=ProductMedia.objects.filter(is_feature=True), to_attr='feature_media'
         )
         base_qs = (
             Product.objects
                    .filter(is_active=True, stock__gt=0)
-                   .exclude(Q(id__in=exclude_ids) | Q(seller=user))
-                   .prefetch_related(feature_media_prefetch)
+                   .exclude(seller=user)
+                   .exclude(id__in=excluded_ids)
+                   .prefetch_related(feature_prefetch)
         )
 
-        recs = []
-        if all_cat_ids:
-            # 5. Get sibling categories in two queries
-            parent_ids = (
-                Category.objects
-                        .filter(pk__in=all_cat_ids)
-                        .values_list('parent_id', flat=True)
-                        .distinct()
-            )
-            sibling_cat_ids = (
-                Category.objects
-                        .filter(parent_id__in=parent_ids)
-                        .exclude(pk__in=all_cat_ids)
-                        .values_list('pk', flat=True)
-            )
+        # 4. If no signals, fallback directly
+        if not cat_weights:
+            return base_qs.order_by('-units_sold')[:limit]
 
-            # 6. Cross-sell products in a single query
-            recs = list(
-                base_qs
-                    .filter(category_id__in=sibling_cat_ids)
-                    .order_by('-units_sold')[:limit]
-            )
+        # 5. Batch-fetch child categories for all parent groups
+        group_ids = list(cat_weights.keys())
+        flat_excluded = {c for cats in excluded_children.values() for c in cats}
+        raw_children = Category.objects.filter(parent_id__in=group_ids)\
+                                     .exclude(id__in=flat_excluded)\
+                                     .values_list('id', 'parent_id')
 
-        # 7. Fallback bestsellers (single query)
-        if len(recs) < limit:
-            needed = limit - len(recs)
-            used_ids = {p.id for p in recs}
-            fallback_qs = (
-                base_qs
-                    .exclude(id__in=used_ids)
-                    .order_by('-units_sold')[:needed]
-            )
-            recs.extend(list(fallback_qs))
+        # 6. Build weight map for each child category
+        weight_map = {cid: cat_weights[parent_id] for cid, parent_id in raw_children}
+
+        # 7. Annotate score and order by score, units_sold, average_rating
+        cases = [When(category_id=cid, then=Value(wt)) for cid, wt in weight_map.items()]
+        recs = (
+            base_qs
+            .annotate(score=Case(*cases, default=Value(0), output_field=IntegerField()))
+            .order_by('-score', '-units_sold', '-average_rating')[:limit]
+        )
 
         return recs
