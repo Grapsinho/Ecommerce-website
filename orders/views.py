@@ -2,19 +2,16 @@ from rest_framework import permissions, viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.core.cache import cache
-from django.db.models import Prefetch
 
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes, extend_schema_view
-
 from users.authentication import JWTAuthentication
-from .models import Order, OrderItem
 from .serializers import (
     OrderSerializer, OrderDetailSerializer,
     CheckoutSerializer, AddressSerializer
 )
-from .pagination import OrderCursorPagination
 from .services import OrderService
-from product_management.models import ProductMedia
+from .ord_cache import get_cached_order_ids
+from .ord_utils import get_pagination_params, build_order_queryset, build_page_urls
 
 import logging
 logger = logging.getLogger("rest_framework")
@@ -73,50 +70,38 @@ class OrderViewSet(
 ):
     authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = OrderCursorPagination
 
-    def get_queryset(self):
-        return (
-            Order.objects.filter(user=self.request.user, items__isnull=False)
-                 .select_related('shipping_method', 'shipping_address')
-                 .prefetch_related(
-                     Prefetch(
-                         'items',
-                         queryset=OrderItem.objects
-                             .select_related('product', 'product__seller')
-                             .prefetch_related(
-                                 Prefetch(
-                                     'product__media',
-                                     queryset=ProductMedia.objects.filter(is_feature=True),
-                                     to_attr='feature_media'
-                                 )
-                             )
-                     )
-                 )
-                 .distinct()
-                 .order_by('-created_at')
-        )
 
     def get_serializer_class(self):
-
-        if self.request and self.action == 'retrieve':
+        if self.action == 'retrieve':
             return OrderDetailSerializer
         return OrderSerializer
 
     def list(self, request, *args, **kwargs):
-        # 1. Fetch the full queryset and count it
-        qs = self.get_queryset()
-        total_orders = qs.count()
+        # 1) Retrieve cached order IDs
+        user = request.user
+        order_ids = get_cached_order_ids(user)
+        total = len(order_ids)
 
-        # 2. Apply pagination
-        page = self.paginate_queryset(qs)
-        serializer = self.get_serializer(page, many=True)
-        response = self.get_paginated_response(serializer.data)
+        # 2) Pagination parameters
+        page, page_size = get_pagination_params(request)
+        start = (page - 1) * page_size
+        end = start + page_size
+        page_ids = order_ids[start:end]
 
-        # 3. Inject the total into the response payload
-        response.data['total_orders'] = total_orders
-        return response
+        # 3) Fetch and serialize
+        queryset = build_order_queryset(page_ids)
+        results = self.get_serializer(queryset, many=True).data
 
+        # 4) Build pagination links
+        next_url, prev_url = build_page_urls(request, page, page_size, total)
+
+        return Response({
+            'count': total,
+            'next': next_url,
+            'previous': prev_url,
+            'results': results,
+        })
 
     @action(detail=False, methods=['get'], url_path='default-address')
     def default_address(self, request):

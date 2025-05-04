@@ -10,7 +10,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
 from product_management.models import Product, ProductMedia
-from .services import Recommendations
+from .dsh_cache import get_cached_recommendations, get_my_product_ids
 from .filters import MyProductFilter
 from users.authentication import JWTAuthentication
 from users.models import User
@@ -78,16 +78,21 @@ class MyProductListView(generics.ListAPIView):
     filterset_class = MyProductFilter
 
     def get_queryset(self):
-        return (
-            Product.objects.filter(seller=self.request.user)
-            .prefetch_related(
-                Prefetch(
-                    'media',
-                    queryset=ProductMedia.objects.filter(is_feature=True),
-                    to_attr='feature_media'
-                )
-            )
+        # 1) Fetch cached IDs
+        ids = get_my_product_ids(self.request.user)
+        # 2) Build queryset restricted to those IDs
+        qs = (
+            Product.objects
+                   .filter(id__in=ids)
+                   .prefetch_related(
+                       Prefetch(
+                           'media',
+                           queryset=ProductMedia.objects.filter(is_feature=True),
+                           to_attr='feature_media'
+                       )
+                   )
         )
+        return qs
 
 
 @extend_schema(
@@ -102,12 +107,19 @@ class RecommendationView(APIView):
     """
     GET /dashboard/me/recommendations/?limit=10
     """
-
     serializer_class = RecommendationSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        recs = Recommendations.for_user(request.user, request.query_params.get('limit', 10))
-        serializer = RecommendationSerializer(recs, many=True)
+        # Pull limit from query params, default to 10
+        try:
+            limit = int(request.query_params.get('limit', 10))
+        except ValueError:
+            limit = 10
+
+        # Use the cached recommendation IDs (with 30m TTL + event invalidation)
+        recs_qs = get_cached_recommendations(request.user, limit)
+
+        serializer = RecommendationSerializer(recs_qs, many=True, context={'request': request})
         return Response(serializer.data)
