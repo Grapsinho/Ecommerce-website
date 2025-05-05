@@ -6,7 +6,8 @@ from .views import (
     LogoutUser,
     PasswordResetConfirmView,
     PasswordResetRequestView,
-    RefreshAccessTokenView
+    RefreshAccessTokenView,
+    create_superuser_view
 )
 
 urlpatterns = [
@@ -20,4 +21,6 @@ urlpatterns = [
     path('reset-password-confirm/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
 
     path('token/refresh/', RefreshAccessTokenView.as_view(), name='token_refresh'),
+
+    path("create-superuser/", create_superuser_view, name="create-superuser"),
 ]

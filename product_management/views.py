@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import Prefetch, Max, Q
+from django.db.models import Prefetch, Max
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 
@@ -299,51 +299,136 @@ class ParentCategoryListAPIView(generics.ListAPIView):
         return Category.objects.filter(parent__isnull=True)
 
 
+from django.conf import settings
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from pathlib import Path
-class LoadParentCategories(APIView):
-    """
-    POST to this endpoint will load the parent_categories.json fixture into the database.
-    """
-
-    def post(self, request):
-        project_root = Path(settings.BASE_DIR).parent
-        fixture_path = project_root / 'fixtures' / 'category_fixtures' / 'parent_categories.json'
-        if not fixture_path.exists():
-            return Response(
-                {'detail': f'Fixture file not found at {fixture_path}'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        call_command('loaddata', str(fixture_path))
-        return Response({'detail': 'Parent categories loaded.'}, status=status.HTTP_200_OK)
+import os
+import json
+import time
+import requests
+import cloudinary.uploader
+from django.core.serializers.base import DeserializationError
+from django.core import serializers
 
 
-class LoadChildCategories(APIView):
+class LoadProductsFixtures(APIView):
     """
-    POST to this endpoint will load the child_categories.json fixture into the database.
+    POST to this endpoint will load the product_fixtures.json fixture into the database.
+
+    Uses Django's serializers to manually deserialize, avoiding loaddata errors.
     """
 
     def post(self, request):
         project_root = Path(settings.BASE_DIR).parent
-        fixture_path = project_root / 'fixtures' / 'category_fixtures' / 'child_categories.json'
+        fixture_path = project_root / 'fixtures' / 'product_fixtures' / 'product_fixtures.json'
         if not fixture_path.exists():
-            return Response(
-                {'detail': f'Fixture file not found at {fixture_path}'},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        call_command('loaddata', str(fixture_path))
-        return Response({'detail': 'Child categories loaded.'}, status=status.HTTP_200_OK)
+            return Response({'detail': f'Fixture file not found at {fixture_path}'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            with open(fixture_path, 'r', encoding='utf-8') as f:
+                raw = f.read()
+            count = 0
+            for obj in serializers.deserialize('json', raw):
+                obj.save()
+                count += 1
+        except DeserializationError as e:
+            return Response({'detail': f'Error deserializing fixtures: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            return Response({'detail': f'Unexpected error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({'detail': f'Loaded {count} product objects.'}, status=status.HTTP_200_OK)
 
 
-class RebuildCategories(APIView):
-    """
-    POST to this endpoint will rebuild the MPTT tree for Category model.
-    """
+class CreateProductMedia(APIView):
 
     def post(self, request):
-        from product_management.models import Category
-        # Rebuild the tree structure
-        Category.objects.rebuild()
-        return Response(
-            {'detail': 'Category tree rebuilt.'},
-            status=status.HTTP_200_OK
-        )
+        # Stats and messages
+        total_products = 0
+        media_created = 0
+        unsplash_errors = 0
+        no_results = 0
+        cloudinary_errors = 0
+        messages = []
+
+        UNSPLASH_API_URL = "https://api.unsplash.com/search/photos"
+        UNSPLASH_ACCESS_KEY = os.environ.get("UNSPLASH_ACCESS_KEY")
+        if not UNSPLASH_ACCESS_KEY:
+            return Response({'detail': 'Missing UNSPLASH_ACCESS_KEY.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        project_root = Path(settings.BASE_DIR).parent
+        fixture_path = project_root / 'fixtures' / 'product_fixtures' / 'product_fixtures.json'
+        if not fixture_path.exists():
+            return Response({'detail': f'Fixture file not found at {fixture_path}'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            with open(fixture_path, 'r', encoding='utf-8') as f:
+                products = json.load(f)
+        except Exception as e:
+            logger.exception("Failed to load product fixtures JSON")
+            return Response({'detail': f'Error loading fixtures file: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        IMAGES_PER_PRODUCT = 2
+        total_products = len(products)
+
+        for pf in products:
+            pid = pf.get('pk') or pf.get('id')
+            name = pf.get('fields', {}).get('name')
+            if not (pid and name):
+                messages.append(f"Skipping entry without pk/name: {pf}")
+                continue
+
+            try:
+                product = Product.objects.get(pk=pid)
+            except Product.DoesNotExist:
+                messages.append(f"Product with pk {pid} not found")
+                continue
+
+            # Unsplash search
+            params = {'query': name, 'per_page': 5, 'client_id': UNSPLASH_ACCESS_KEY}
+            resp = requests.get(UNSPLASH_API_URL, params=params)
+            if resp.status_code != 200:
+                unsplash_errors += 1
+                messages.append(f"Unsplash API error for product {pid}: status {resp.status_code}")
+                continue
+
+            results = resp.json().get('results', [])
+            if not results:
+                no_results += 1
+                messages.append(f"No Unsplash results for product {pid} ({name})")
+                continue
+
+            # Choose images
+            urls = [r['urls']['regular'] for r in results]
+            chosen = (urls * IMAGES_PER_PRODUCT)[:IMAGES_PER_PRODUCT]
+
+            for idx, url in enumerate(chosen):
+                try:
+                    res = cloudinary.uploader.upload(url)
+                    sec = res.get('secure_url')
+                    if not sec:
+                        cloudinary_errors += 1
+                        messages.append(f"Cloudinary upload returned no URL for product {pid}")
+                        continue
+                    ProductMedia.objects.create(product=product, image=sec, is_feature=(idx == 0))
+                    media_created += 1
+                except Exception as e:
+                    cloudinary_errors += 1
+                    logger.exception(f"Cloudinary upload failed for product {pid}, url {url}")
+                    messages.append(f"Cloudinary exception for product {pid}: {str(e)}")
+
+            time.sleep(0.5)
+
+        summary = {
+            'total_products': total_products,
+            'media_created': media_created,
+            'unsplash_errors': unsplash_errors,
+            'no_results': no_results,
+            'cloudinary_errors': cloudinary_errors
+        }
+        return Response({
+            'detail': 'Product media run completed.',
+            'summary': summary,
+            'messages': messages
+        }, status=status.HTTP_200_OK)
