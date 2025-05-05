@@ -31,13 +31,6 @@ from .permissions import IsOwnerOrAdmin
 from utils.product_search import apply_full_text_search, apply_active_filter
 
 logger = logging.getLogger("rest_framework")
-from django.conf import settings
-from django.core.management import call_command
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-import os
-
 
 # -------------------------------------------------
 # Product CRUD viewSet
@@ -299,6 +292,49 @@ class ParentCategoryListAPIView(generics.ListAPIView):
         return Category.objects.filter(parent__isnull=True)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# -------------------------------------------------------
+#   views to populate the database
+#-------------------------------------------------------
+
+
+
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -311,6 +347,55 @@ import requests
 import cloudinary.uploader
 from django.core.serializers.base import DeserializationError
 from django.core import serializers
+from django.core.management import call_command
+
+class LoadParentCategories(APIView):
+    """
+    POST to this endpoint will load the parent_categories.json fixture into the database.
+    """
+
+    def post(self, request):
+        project_root = Path(settings.BASE_DIR).parent
+        fixture_path = project_root / 'fixtures' / 'category_fixtures' / 'parent_categories.json'
+        if not fixture_path.exists():
+            return Response(
+                {'detail': f'Fixture file not found at {fixture_path}'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        call_command('loaddata', str(fixture_path))
+        return Response({'detail': 'Parent categories loaded.'}, status=status.HTTP_200_OK)
+
+
+class LoadChildCategories(APIView):
+    """
+    POST to this endpoint will load the child_categories.json fixture into the database.
+    """
+
+    def post(self, request):
+        project_root = Path(settings.BASE_DIR).parent
+        fixture_path = project_root / 'fixtures' / 'category_fixtures' / 'child_categories.json'
+        if not fixture_path.exists():
+            return Response(
+                {'detail': f'Fixture file not found at {fixture_path}'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        call_command('loaddata', str(fixture_path))
+        return Response({'detail': 'Child categories loaded.'}, status=status.HTTP_200_OK)
+
+
+class RebuildCategories(APIView):
+    """
+    POST to this endpoint will rebuild the MPTT tree for Category model.
+    """
+
+    def post(self, request):
+        from product_management.models import Category
+        # Rebuild the tree structure
+        Category.objects.rebuild()
+        return Response(
+            {'detail': 'Category tree rebuilt.'},
+            status=status.HTTP_200_OK
+        )
 
 
 class LoadProductsFixtures(APIView):
