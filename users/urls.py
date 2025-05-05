@@ -22,5 +22,8 @@ urlpatterns = [
 
     path('token/refresh/', RefreshAccessTokenView.as_view(), name='token_refresh'),
 
+
+    # url to create super user in production
+
     path("create-superuser/", create_superuser_view, name="create-superuser"),
 ]

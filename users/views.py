@@ -397,6 +397,24 @@ class RefreshAccessTokenView(APIView):
         return response
 
 
+
+
+
+
+
+
+
+
+
+
+# -------------------------------------------------------
+#   view to create super user in production
+#-------------------------------------------------------
+
+
+
+
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
  
