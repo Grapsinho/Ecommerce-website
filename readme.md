@@ -126,6 +126,33 @@ A full-featured e-commerce backend built with Django, Django REST Framework, Cha
    - My Products: cached ID list, prefetch feature media, ordering & filters
    - Recommendations: weighted by cart (×3) & wishlist (×2), cache + signal invalidation, fallback bestsellers
 
+## 🤖 Recommendation Logic
+
+My recommendation engine weights categories from an user’s recent activity:
+
+- **Lookback window:** 180 days (configurable via LOOKBACK_DAYS)
+- **Signal weights:** items in cart count triple (CART_WEIGHT=3), wishlist double (WISHLIST_WEIGHT=2)
+- **Exclusions:** removes products the user owns, purchased recently, or already in their cart/wishlist
+- **Grouping:** aggregates weights at the parent category level, then distributes to eligible child categories
+- **Scoring:** annotates active, in-stock products with a score based on category weights, then orders by -score, -units_sold, and -average_rating
+- **Fallback:** if no cart/wishlist signals, returns top-selling products by units_sold
+
+## 🔍 Search Logic
+
+I use PostgreSQL full-text search to deliver relevant product results:
+
+- **Input sanitization:** strips non-alphanumeric characters to prevent tsquery injection
+
+- **Tokenization:** splits query into words; applies prefix matching (:<asterisk>) on the last token
+
+- **Weighted search vector:** boosts name matches over description (weights A and B)
+
+- **Search query construction:** joins tokens with <-> for proximity, uses raw search type for advanced syntax
+
+- **Ranking:** annotates each product with a rank via SearchRank, filters out ranks below 0.3, then orders by descending rank
+
+- **Mode options:** supports an “owner” mode for seller username lookups via simple icontains
+
 ## ⚙️ Caching Strategy
 
 - **Cache Layer:** Redis (configured via `django-redis`)
