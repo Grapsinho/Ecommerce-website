@@ -18,3 +18,7 @@ from mptt.managers import TreeManager
 Category.objects.rebuild()
 
 
+
+////////////////////////////
+gavtesto orderebi, chati.
+////////////////////////////

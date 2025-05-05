@@ -354,6 +354,8 @@ class LoadParentCategories(APIView):
     POST to this endpoint will load the parent_categories.json fixture into the database.
     """
 
+    schema = None
+
     def post(self, request):
         project_root = Path(settings.BASE_DIR).parent
         fixture_path = project_root / 'fixtures' / 'category_fixtures' / 'parent_categories.json'
@@ -370,6 +372,8 @@ class LoadChildCategories(APIView):
     """
     POST to this endpoint will load the child_categories.json fixture into the database.
     """
+
+    schema = None
 
     def post(self, request):
         project_root = Path(settings.BASE_DIR).parent
@@ -388,6 +392,8 @@ class RebuildCategories(APIView):
     POST to this endpoint will rebuild the MPTT tree for Category model.
     """
 
+    schema = None
+
     def post(self, request):
         from product_management.models import Category
         # Rebuild the tree structure
@@ -404,6 +410,8 @@ class LoadProductsFixtures(APIView):
 
     Uses Django's serializers to manually deserialize, avoiding loaddata errors.
     """
+
+    schema = None
 
     def post(self, request):
         project_root = Path(settings.BASE_DIR).parent
@@ -427,6 +435,8 @@ class LoadProductsFixtures(APIView):
 
 
 class CreateProductMedia(APIView):
+
+    schema = None
 
     def post(self, request):
         # Stats and messages
