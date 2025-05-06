@@ -81,26 +81,31 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         try:
+            # pop avatar out so you can inspect it separately
+            avatar = validated_data.pop('avatar', None)
 
-            user = User.objects.create_user(
-                full_username = validated_data['full_username'],
-                email=validated_data['email'],
-                password=validated_data['password'],
-                age=validated_data.get('age'),
-                city=validated_data.get('city'),
-                phone_number=validated_data.get('phone_number'),
-                avatar=validated_data.get('avatar'),
-            )
+            # build the kwargs for create_user
+            user_kwargs = {
+                'full_username': validated_data['full_username'],
+                'email':          validated_data['email'],
+                'password':       validated_data['password'],
+                'age':            validated_data.get('age'),
+                'city':           validated_data.get('city'),
+                'phone_number':   validated_data.get('phone_number'),
+            }
+            # only include avatar if it's truthy
+            if avatar:
+                user_kwargs['avatar'] = avatar
+
+            user = User.objects.create_user(**user_kwargs)
             logger.info(f"User {user.email} created successfully.")
-            
-            # Clear the confirmation flag after successful registration
             cache.delete(f"email_confirmed_{validated_data.get('email')}")
             return user
         except IntegrityError as ie:
-            logger.error(f"Integrity error for {validated_data.get('email')}: {str(ie)}")
+            logger.error(f"Integrity error for {validated_data.get('email')}: {ie}")
             raise serializers.ValidationError({"detail": "This email or username already exists."})
         except Exception as e:
-            logger.error(f"Error creating user {validated_data.get('email')}: {str(e)}")
+            logger.error(f"Error creating user {validated_data.get('email')}: {e}")
             raise serializers.ValidationError({"detail": "Failed to create user. Please try again."})
     
 class LoginUserSerializer(serializers.Serializer):
