@@ -38,7 +38,7 @@ class User(AbstractUser):
     full_username = models.CharField(max_length=100, help_text="Full user name (e.g John Doe)")
     avatar = models.ImageField(
         upload_to="avatars/",
-        default="avatars/default-boy-avatar_vqfylj",
+        default="avatars/default-boy-avatar_muzh4n",
         null=True,
         storage=MediaCloudinaryStorage()
     )
