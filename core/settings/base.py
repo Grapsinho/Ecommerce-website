@@ -11,6 +11,7 @@ load_dotenv()
 debug = os.environ.get('DEBUG')
 secret_key = os.environ.get('KEY_SECRET')
 
+WS_PATH = "ws"
 
 SECRET_KEY = secret_key
 
@@ -18,6 +19,7 @@ if debug == "True":
     DEBUG = True
 else:
     DEBUG = False
+    WS_PATH = "wss"
 
 ALLOWED_HOSTS = []
 

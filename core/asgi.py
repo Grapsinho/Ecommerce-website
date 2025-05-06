@@ -1,10 +1,9 @@
 import os
 from django.core.asgi import get_asgi_application
-from core.settings.base import DEBUG  # Import DEBUG from the base settings
+from core.settings.base import DEBUG
 
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-from channels.security.websocket import AllowedHostsOriginValidator
 
 # Use DEBUG to set the appropriate settings module for ASGI
 if DEBUG:

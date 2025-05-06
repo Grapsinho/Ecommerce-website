@@ -1,6 +1,6 @@
 import os
 from django.core.wsgi import get_wsgi_application
-from core.settings.base import DEBUG  # Import DEBUG from the base settings
+from core.settings.base import DEBUG
 
 # Use DEBUG to set the appropriate settings module for WSGI
 if DEBUG:
