@@ -9,6 +9,7 @@ from .serializers import (
     OrderSerializer, OrderDetailSerializer,
     CheckoutSerializer, AddressSerializer
 )
+from .models import Order
 from .services import OrderService
 from .ord_cache import get_cached_order_ids
 from .ord_utils import get_pagination_params, build_order_queryset, build_page_urls
@@ -71,50 +72,50 @@ class OrderViewSet(
     authentication_classes = [JWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
+    def get_queryset(self):
+        user = self.request.user
+
+        if self.request and self.action == 'list':
+            order_ids = get_cached_order_ids(user)
+            # build_order_queryset should return an Order queryset
+            return build_order_queryset(order_ids)
+        # retrieve, etc.
+        return Order.objects.filter(user=user)
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
-            return OrderDetailSerializer
-        return OrderSerializer
+        return OrderDetailSerializer if self.request and self.action == 'retrieve' else OrderSerializer
 
     def list(self, request, *args, **kwargs):
-        # 1) Retrieve cached order IDs
-        user = request.user
-        order_ids = get_cached_order_ids(user)
-        total = len(order_ids)
+        # Reuse get_queryset for the un‐paginated base set:
+        base_qs = self.get_queryset()
+        total = base_qs.count()
 
-        # 2) Pagination parameters
         page, page_size = get_pagination_params(request)
-        start = (page - 1) * page_size
-        end = start + page_size
-        page_ids = order_ids[start:end]
+        start, end = (page - 1) * page_size, page * page_size
+        page_qs = base_qs[start:end]
 
-        # 3) Fetch and serialize
-        queryset = build_order_queryset(page_ids)
-        results = self.get_serializer(queryset, many=True).data
-
-        # 4) Build pagination links
+        data = self.get_serializer(page_qs, many=True).data
         next_url, prev_url = build_page_urls(request, page, page_size, total)
 
         return Response({
             'count': total,
             'next': next_url,
             'previous': prev_url,
-            'results': results,
+            'results': data,
         })
 
     @action(detail=False, methods=['get'], url_path='default-address')
     def default_address(self, request):
-        user = request.user
-        if hasattr(user, 'address'):
-            return Response(AddressSerializer(user.address).data)
-        return Response(None, status=status.HTTP_204_NO_CONTENT)
+        if hasattr(request.user, 'address'):
+            return Response(AddressSerializer(request.user.address).data)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['post'], url_path='checkout')
     def checkout(self, request):
         user = request.user
-        idem_key = request.headers.get('Idempotency-Key')
-        cache_key = f"checkout:{user.id}:{idem_key}" if idem_key else None
+        idem = request.headers.get('Idempotency-Key')
+        cache_key = f"checkout:{user.id}:{idem}" if idem else None
+
         if cache_key and (cached := cache.get(cache_key)) is not None:
             return Response(cached, status=status.HTTP_200_OK)
 
@@ -131,8 +132,9 @@ class OrderViewSet(
         except ValueError as exc:
             return Response({'detail': str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
-        serialized = self.get_serializer(orders_qs, many=True).data
+        serialized = OrderDetailSerializer(orders_qs, many=True).data
         payload = {'orders': serialized}
+
         if cache_key:
             cache.set(cache_key, payload, timeout=3600)
         return Response(payload, status=status.HTTP_201_CREATED)
