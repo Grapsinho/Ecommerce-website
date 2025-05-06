@@ -17,18 +17,7 @@ from .ord_utils import get_pagination_params, build_order_queryset, build_page_u
 import logging
 logger = logging.getLogger("rest_framework")
 
-@extend_schema(
-    tags=['orders'],
-    parameters=[
-        OpenApiParameter(
-            name='id',
-            location=OpenApiParameter.PATH,
-            description='UUID of the order',
-            required=True,
-            type=OpenApiTypes.UUID,
-        )
-    ]
-)
+
 @extend_schema_view(
     list=extend_schema(
         summary="List Orders",
