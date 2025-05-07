@@ -173,10 +173,13 @@ CACHES = {
 
 
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
             "hosts": [redis_url_websocket],
+            "capacity": 1000,
+            "expiry": 10,
+            "max_connections": 5,    # never open more than 5 connections
         },
     },
 }

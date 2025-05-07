@@ -16,8 +16,10 @@ app = Celery('core')
 # Pull configuration from Django settings via CELERY_... keys
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
-# silence the warnings
+app.conf.broker_pool_limit = 1               # only one connection in the pool
 app.conf.broker_connection_retry_on_startup = True
+app.conf.worker_send_task_events = False     # don’t send/receive task‑event heartbeat chatter
+app.conf.task_send_sent_event = False
 
 # Auto-discover tasks.py in each application registered in INSTALLED_APPS
 app.autodiscover_tasks()
