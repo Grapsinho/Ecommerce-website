@@ -234,7 +234,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return queryset
 
-    @method_decorator(cache_page(60 * 2, key_prefix="product_management:product_list"), name="list")
+    @method_decorator(cache_page(60 * 5, key_prefix="product_management:product_list"), name="list")
     def list(self, request, *args, **kwargs):
         filtered_queryset = self.filter_queryset(self.get_queryset())
         aggregated = filtered_queryset.aggregate(max_price=Max('price'))
