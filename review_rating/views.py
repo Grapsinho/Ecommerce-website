@@ -74,7 +74,7 @@ class ReviewListCreateAPIView(generics.ListCreateAPIView):
 )
 class ReviewDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReviewSerializer
-    authentication_classes = [JWTAuthentication]
+    authentication_classes= [JWTAuthentication]
     permission_classes = [IsOwnerOrAdmin]
     lookup_field = 'id'
     lookup_url_kwarg = 'review_id'
@@ -86,3 +86,9 @@ class ReviewDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Review.objects.select_related('user').all()
+
+    def get_serializer_context(self):
+        # inject the product slug here as well
+        context = super().get_serializer_context()
+        context['product_slug'] = self.kwargs.get('slug')
+        return context
