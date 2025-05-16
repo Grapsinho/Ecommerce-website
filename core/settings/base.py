@@ -298,3 +298,10 @@ LOGGING = {
         },
     },
 }
+
+
+
+REVIEW_RATING_PAGINATION_LIMIT = 2
+
+if os.environ.get('PAGINATION_LIMIT', 2):
+    REVIEW_RATING_PAGINATION_LIMIT = int(os.environ.get('PAGINATION_LIMIT', 2))

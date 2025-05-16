@@ -15,8 +15,10 @@ from drf_spectacular.utils import (
 
 from rest_framework.permissions import SAFE_METHODS
 
+from core.settings.base import REVIEW_RATING_PAGINATION_LIMIT
+
 class LoadMorePagination(LimitOffsetPagination):
-    default_limit = 10
+    default_limit = REVIEW_RATING_PAGINATION_LIMIT
 
 @extend_schema_view(
     get=extend_schema(
