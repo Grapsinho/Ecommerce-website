@@ -3,7 +3,7 @@
     "model": "product_management.product",
     "pk": 1,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "iPhone 14 Pro",
       "description": "The latest Apple flagship featuring an advanced triple-camera system and A16 Bionic chip for exceptional performance.",
       "slug": "iphone-14-pro",
@@ -19,7 +19,7 @@
     "model": "product_management.product",
     "pk": 2,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Dell XPS 15",
       "description": "A high-performance laptop offering a near bezel-less display, robust build quality, and powerful internals to boost productivity.",
       "slug": "dell-xps-15",
@@ -35,7 +35,7 @@
     "model": "product_management.product",
     "pk": 3,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Canon EOS R6",
       "description": "A professional mirrorless camera featuring high-speed autofocus, superb image quality, and advanced video capabilities.",
       "slug": "canon-eos-r6",
@@ -51,7 +51,7 @@
     "model": "product_management.product",
     "pk": 4,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Sony Noise Cancelling Headphones",
       "description": "Experience immersive sound with industry-leading noise cancellation technology and premium comfort design.",
       "slug": "sony-noise-cancelling-headphones",
@@ -67,7 +67,7 @@
     "model": "product_management.product",
     "pk": 5,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Men's Classic Leather Jacket",
       "description": "Premium quality leather jacket combining timeless style with durability, perfect for any wardrobe.",
       "slug": "mens-classic-leather-jacket",
@@ -83,7 +83,7 @@
     "model": "product_management.product",
     "pk": 6,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Elegant Women's Silk Scarf",
       "description": "A luxurious silk scarf featuring vibrant patterns and crafted with attention to detail for a refined look.",
       "slug": "elegant-womens-silk-scarf",
@@ -99,7 +99,7 @@
     "model": "product_management.product",
     "pk": 7,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Kids' Educational Tablet",
       "description": "A robust and interactive tablet designed for children, offering educational apps and durable build quality.",
       "slug": "kids-educational-tablet",
@@ -115,7 +115,7 @@
     "model": "product_management.product",
     "pk": 8,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Fitbit Versa 3 Smartwatch",
       "description": "A versatile smartwatch that offers comprehensive fitness tracking, heart rate monitoring, and built-in GPS.",
       "slug": "fitbit-versa-3-smartwatch",
@@ -131,7 +131,7 @@
     "model": "product_management.product",
     "pk": 9,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Breville Espresso Machine",
       "description": "Engineered for consistent, cafe-quality espresso, this machine is a must-have for coffee aficionados.",
       "slug": "breville-espresso-machine",
@@ -147,7 +147,7 @@
     "model": "product_management.product",
     "pk": 10,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Le Creuset Dutch Oven",
       "description": "An iconic enameled cast iron pot, ideal for slow-cooking, braising and creating rich, savory stews.",
       "slug": "le-creuset-dutch-oven",
@@ -163,7 +163,7 @@
     "model": "product_management.product",
     "pk": 11,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Modern Sofa Collection",
       "description": "A contemporary sofa set that blends comfort with clean, modern design for upscale living spaces.",
       "slug": "modern-sofa-collection",
@@ -179,7 +179,7 @@
     "model": "product_management.product",
     "pk": 12,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Luxury Bedding Set",
       "description": "A premium bedding ensemble crafted from high thread count cotton for a sumptuous sleep experience.",
       "slug": "luxury-bedding-set",
@@ -195,7 +195,7 @@
     "model": "product_management.product",
     "pk": 13,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Nordic Treadmill Pro",
       "description": "A state-of-the-art treadmill designed for intense home workouts and endurance training.",
       "slug": "nordic-treadmill-pro",
@@ -211,7 +211,7 @@
     "model": "product_management.product",
     "pk": 14,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Camping Tent for 4",
       "description": "A spacious, durable four-person tent designed for family adventures and reliable performance in the outdoors.",
       "slug": "camping-tent-for-4",
@@ -227,7 +227,7 @@
     "model": "product_management.product",
     "pk": 15,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Specialized Road Bike",
       "description": "A high-performance road bike engineered for competitive cyclists, featuring lightweight materials and precision engineering.",
       "slug": "specialized-road-bike",
@@ -243,7 +243,7 @@
     "model": "product_management.product",
     "pk": 16,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Samsung Galaxy S23",
       "description": "The latest flagship smartphone by Samsung featuring an advanced camera system and an immersive AMOLED display.",
       "slug": "samsung-galaxy-s23",
@@ -259,7 +259,7 @@
     "model": "product_management.product",
     "pk": 17,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "HP Spectre x360 14",
       "description": "A premium convertible laptop with a 360-degree hinge, delivering top-notch performance and stunning design.",
       "slug": "hp-spectre-x360-14",
@@ -275,7 +275,7 @@
     "model": "product_management.product",
     "pk": 18,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Nikon Z7 II Mirrorless",
       "description": "A top-tier mirrorless camera featuring a high-resolution sensor, advanced autofocus, and excellent low-light performance.",
       "slug": "nikon-z7-ii-mirrorless",
@@ -291,7 +291,7 @@
     "model": "product_management.product",
     "pk": 19,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Fossil Gen 6 Smartwatch",
       "description": "A smart wearable that blends classic design with modern functionality to monitor your health and stay connected.",
       "slug": "fossil-gen-6-smartwatch",
@@ -307,7 +307,7 @@
     "model": "product_management.product",
     "pk": 20,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Levi's Men's Denim Jacket",
       "description": "A rugged yet stylish denim jacket crafted from premium materials, ideal for a timeless urban look.",
       "slug": "levis-mens-denim-jacket",
@@ -323,7 +323,7 @@
     "model": "product_management.product",
     "pk": 21,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Calvin Klein Women's Summer Dress",
       "description": "An elegant summer dress that combines sleek style with breathable comfort for a chic look.",
       "slug": "calvin-klein-womens-summer-dress",
@@ -339,7 +339,7 @@
     "model": "product_management.product",
     "pk": 22,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Lego Star Wars Millennium Falcon",
       "description": "A detailed LEGO set recreating the iconic Millennium Falcon with authentic design elements for fans and collectors.",
       "slug": "lego-star-wars-millennium-falcon",
@@ -355,7 +355,7 @@
     "model": "product_management.product",
     "pk": 23,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Ravensburger 1000-Piece Puzzle",
       "description": "Challenge your mind with a beautifully illustrated 1000-piece puzzle designed to offer hours of entertainment.",
       "slug": "ravensburger-1000-piece-puzzle",
@@ -371,7 +371,7 @@
     "model": "product_management.product",
     "pk": 24,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Bose QuietComfort Earbuds",
       "description": "Wireless earbuds offering exceptional sound quality and active noise cancellation for a premium audio experience.",
       "slug": "bose-quietcomfort-earbuds",
@@ -387,7 +387,7 @@
     "model": "product_management.product",
     "pk": 25,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "KitchenAid Stand Mixer",
       "description": "A kitchen essential, this stand mixer blends power and versatility to help you create bakery-quality treats at home.",
       "slug": "kitchenaid-stand-mixer",
@@ -403,7 +403,7 @@
     "model": "product_management.product",
     "pk": 26,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Ikea Malm Bed Frame",
       "description": "A modern bed frame by Ikea, offering clean lines and durable design that fits seamlessly into any contemporary bedroom.",
       "slug": "ikea-malm-bed-frame",
@@ -419,7 +419,7 @@
     "model": "product_management.product",
     "pk": 27,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Adidas Ultraboost Running Shoes",
       "description": "High-performance running shoes engineered for comfort and speed with exceptional energy return in every step.",
       "slug": "adidas-ultraboost-running-shoes",
@@ -435,7 +435,7 @@
     "model": "product_management.product",
     "pk": 28,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Sony PlayStation 5",
       "description": "The next-generation gaming console delivering immersive gameplay with lightning-fast loading and ray tracing technology.",
       "slug": "sony-playstation-5",
@@ -451,7 +451,7 @@
     "model": "product_management.product",
     "pk": 29,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Brother HL-L2350DW Laser Printer",
       "description": "A reliable laser printer with wireless connectivity, designed for fast, efficient printing in a compact office space.",
       "slug": "brother-hl-l2350dw-laser-printer",
@@ -467,7 +467,7 @@
     "model": "product_management.product",
     "pk": 30,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Garmin Forerunner 955",
       "description": "A cutting-edge GPS running watch, providing detailed training analytics and real-time performance monitoring to athletes.",
       "slug": "garmin-forerunner-955",
@@ -483,7 +483,7 @@
     "model": "product_management.product",
     "pk": 31,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Google Pixel 7 Pro",
       "description": "A cutting-edge smartphone delivering advanced photography features and a smooth user experience powered by Google's AI.",
       "slug": "google-pixel-7-pro",
@@ -499,7 +499,7 @@
     "model": "product_management.product",
     "pk": 32,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Lenovo ThinkPad X1 Carbon",
       "description": "A premium ultralight business laptop known for its robust performance, durability, and sleek design.",
       "slug": "lenovo-thinkpad-x1-carbon",
@@ -515,7 +515,7 @@
     "model": "product_management.product",
     "pk": 33,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "DJI Mavic Air 2 Drone",
       "description": "A compact drone offering advanced camera capabilities, intelligent shooting modes, and stable flight performance.",
       "slug": "dji-mavic-air-2-drone",
@@ -531,7 +531,7 @@
     "model": "product_management.product",
     "pk": 34,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Ray-Ban Aviator Sunglasses",
       "description": "Iconic aviator sunglasses with high-quality lenses and frames crafted for style and protection.",
       "slug": "ray-ban-aviator-sunglasses",
@@ -547,7 +547,7 @@
     "model": "product_management.product",
     "pk": 35,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Herman Miller Aeron Chair",
       "description": "A world-renowned ergonomic office chair offering superior comfort and adjustable support for prolonged use.",
       "slug": "herman-miller-aeron-chair",
@@ -563,7 +563,7 @@
     "model": "product_management.product",
     "pk": 36,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Casper Essential Mattress",
       "description": "Engineered for optimal comfort and support, this mattress uses modern technology to ensure a restful night's sleep.",
       "slug": "casper-essential-mattress",
@@ -579,7 +579,7 @@
     "model": "product_management.product",
     "pk": 37,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Nike Dri-FIT Running Shorts",
       "description": "Lightweight and breathable running shorts designed to wick moisture and enhance performance during intense workouts.",
       "slug": "nike-dri-fit-running-shorts",
@@ -595,7 +595,7 @@
     "model": "product_management.product",
     "pk": 38,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Apple AirPods Pro",
       "description": "Industry-leading wireless earbuds featuring active noise cancellation, spatial audio, and a customizable fit.",
       "slug": "apple-airpods-pro",
@@ -611,7 +611,7 @@
     "model": "product_management.product",
     "pk": 39,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "KitchenAid Food Processor",
       "description": "A versatile food processor engineered to handle slicing, shredding, and mixing tasks for your culinary creations.",
       "slug": "kitchenaid-food-processor",
@@ -627,7 +627,7 @@
     "model": "product_management.product",
     "pk": 40,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Breville Smart Oven",
       "description": "A high-tech countertop oven that offers precise temperature control and multiple cooking functions for home chefs.",
       "slug": "breville-smart-oven",
@@ -643,7 +643,7 @@
     "model": "product_management.product",
     "pk": 41,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Lego Creator Expert Building Kit",
       "description": "An intricate building set designed for enthusiasts, featuring detailed pieces to construct an impressive model.",
       "slug": "lego-creator-expert-building-kit",
@@ -659,7 +659,7 @@
     "model": "product_management.product",
     "pk": 42,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "The Art of Photography Book",
       "description": "A beautifully crafted book that explores techniques and inspiration behind the art of photography.",
       "slug": "the-art-of-photography-book",
@@ -675,7 +675,7 @@
     "model": "product_management.product",
     "pk": 43,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Clinique Moisture Surge Serum",
       "description": "A hydrating serum that revitalizes skin with advanced moisture technology for a radiant complexion.",
       "slug": "clinique-moisture-surge-serum",
@@ -691,7 +691,7 @@
     "model": "product_management.product",
     "pk": 44,
     "fields": {
-      "seller": "b5dd8e51-be2f-4357-9366-d415daf8c3d0",
+      "seller": "c01c093d-7773-43e2-a8ad-21cc9f182ab9",
       "name": "Bose SoundLink Revolve+ Speaker",
       "description": "A portable, high-performance Bluetooth speaker offering 360-degree sound and deep bass for any setting.",
       "slug": "bose-soundlink-revolve-speaker",
@@ -707,7 +707,7 @@
     "model": "product_management.product",
     "pk": 45,
     "fields": {
-      "seller": "a1623e6d-fb7b-4575-9d11-97355ec730f1",
+      "seller": "0c1f5d38-e10c-4c8a-b49e-5e060dd0dff0",
       "name": "Fitbit Inspire 2 Fitness Tracker",
       "description": "A sleek fitness tracker with comprehensive health monitoring features designed to help you achieve your fitness goals.",
       "slug": "fitbit-inspire-2-fitness-tracker",
