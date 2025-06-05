@@ -1,0 +1,9 @@
+# Don’t include .env in the image
+.env
+
+# Typical ignores
+__pycache__/
+*.py[cod]
+env/
+venv/
+.git
